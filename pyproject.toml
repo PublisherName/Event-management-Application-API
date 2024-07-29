@@ -1,0 +1,39 @@
+[project]
+name = "Event Management Application API"
+version = "0.0.1"
+description = "The event management application allows organizers/users to perform CRUD operations on events. "
+readme = "README.md"
+authors = [
+    { name = "Subash Ghimire", email = "event@subashghimire.info.np" },
+]
+maintainers = [
+    { name = "Subash Ghimire", email = "event@subashghimire.info.np" },
+]
+classifiers = [
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+]
+
+license = { text = "MIT" }
+requires-python = ">=3.11"
+keywords = ["Django", "Event Management API", "Event", "Rest Framework"]
+
+
+[project.urls]
+issues = "https://github.com/PublisherName/Event-management-Application-API/issues"
+homepage = "https://event.subashghimire.info.np/"
+repository = "https://github.com/PublisherName/Event-management-Application-API"
+
+[tool.ruff]
+line-length = 99
+
+[tool.ruff.lint]
+extend-select = ["C", "E", "F","I001","Q","SIM", "T", "W"]
+ignore = ["F401"]
+exclude = ["**/migrations/*.py"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 20
