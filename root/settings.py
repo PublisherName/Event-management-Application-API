@@ -147,7 +147,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # CORS
-CORS_ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS").split(",")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
+CORS_ALLOWED_ORIGINS = allowed_origins.split(",") if allowed_origins else []
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
