@@ -16,12 +16,18 @@ Including another URLconf
 """
 
 from django.conf import settings
+from django.conf.urls import (
+    handler404,
+    handler500,
+)
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
+
+from auths.urls import router as auths_urlpatterns
 
 router = routers.DefaultRouter()
 
@@ -36,8 +42,7 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
-urlpatterns = []
-
+router.registry.extend(auths_urlpatterns.registry)
 
 urlpatterns = (
     [
@@ -48,3 +53,6 @@ urlpatterns = (
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 )
+
+handler404 = "root.views.error404"  # noqa: F811
+handler500 = "root.views.error500"  # noqa: F811

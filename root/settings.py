@@ -13,25 +13,32 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
-
-dotenv_path = Path(".env")
-load_dotenv(dotenv_path=dotenv_path)
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+# Initialize environment variables
+env = environ.Env()
+
+# Read .env file if it exists
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG") == "True"
+DEBUG = env("DEVELOPMENT") == "True"
+# DEBUG = True
+ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+PROJECT_TITLE = env("PROJECT_TITLE")
+FRONTEND_URL = env("FRONTEND_URL")
 
 
 # Application definition
@@ -44,8 +51,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework.authtoken",
+    "django_rest_passwordreset",
     "corsheaders",
     "drf_yasg",
+    "auths",
 ]
 
 MIDDLEWARE = [
@@ -64,7 +74,7 @@ ROOT_URLCONF = "root.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": ["templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -125,13 +135,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 STATIC_URL = "/static/"
 
 STATIC_ROOT = os.path.join(BASE_DIR, "public", "static")
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
 
 
 # Media files (Images)
@@ -147,10 +155,36 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # CORS
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins = env("ALLOWED_ORIGINS")
 CORS_ALLOWED_ORIGINS = allowed_origins.split(",") if allowed_origins else []
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
 }
+
+# Django Rest Password Reset
+DJANGO_REST_PASSWORDRESET_NO_INFORMATION_LEAKAGE = True
+DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
+    "CLASS": "django_rest_passwordreset.tokens.RandomNumberTokenGenerator",
+    "OPTIONS": {
+        "min_length": 4,
+        "max_length": 5,
+        "min_number": 1500,
+        "max_number": 9999,
+    },
+}
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {"basic": {"type": "basic"}},
+    "LOGIN_URL": None,
+    "LOGOUT_URL": None,
+}
+
+# Email settings
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+EMAIL_PORT = env("EMAIL_PORT")
+EMAIL_USE_TLS = env("EMAIL_USE_TLS")
