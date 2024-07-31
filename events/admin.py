@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Q
 
 from .models import Event
 
@@ -11,9 +12,10 @@ class EventAdmin(admin.ModelAdmin):
         "formatted_end_date",
         "total_participants",
         "formatted_created_at",
+        "is_verified",
     )
     search_fields = ("title", "description", "location")
-    list_filter = ("start_date", "end_date", "created_at", "updated_at")
+    list_filter = ("start_date", "end_date", "created_at", "updated_at", "is_verified")
     readonly_fields = ["created_by"]
 
     def formatted_start_date(self, obj):
@@ -42,4 +44,4 @@ class EventAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(created_by=request.user)
+        return qs.filter(Q(created_by=request.user) | Q(is_verified=True))
