@@ -28,6 +28,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
 
 from auths.urls import router as auths_urlpatterns
+from events.urls import router as events_urlpatterns
 
 router = routers.DefaultRouter()
 
@@ -43,6 +44,7 @@ schema_view = get_schema_view(
 )
 
 router.registry.extend(auths_urlpatterns.registry)
+router.registry.extend(events_urlpatterns.registry)
 
 urlpatterns = (
     [
