@@ -11,6 +11,9 @@ class EventSerializer(serializers.ModelSerializer):
         exclude = ["created_by"]
 
     def save(self, **kwargs):
+        user = self.context["request"].user
+        if not user.is_superuser:
+            self.validated_data["is_verified"] = False
         try:
             return super().save(**kwargs)
         except DjangoValidationError as e:

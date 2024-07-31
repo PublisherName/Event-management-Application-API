@@ -15,6 +15,7 @@ class Event(models.Model):
     longitude = models.FloatField()
     banner = models.ImageField(upload_to="event_banners/")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="events")
+    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
