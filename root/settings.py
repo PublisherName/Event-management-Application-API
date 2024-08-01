@@ -34,7 +34,6 @@ SECRET_KEY = SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEVELOPMENT") == "True"
-# DEBUG = True
 ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
 
 PROJECT_TITLE = env("PROJECT_TITLE")
