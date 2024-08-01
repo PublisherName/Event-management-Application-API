@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import authentication, status, viewsets
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
