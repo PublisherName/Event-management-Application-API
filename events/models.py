@@ -22,8 +22,20 @@ class Event(models.Model):
     class Meta:
         ordering = ["created_at"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._old_banner = self.banner
+
+    @property
+    def old_banner(self):
+        return self._old_banner
+
+    @old_banner.setter
+    def old_banner(self, value):
+        self._old_banner = value
+
     def clean(self):
         validate_event_dates(self.start_date, self.end_date)
 
     def __str__(self):
-        return self.title
+        return str(self.title)

@@ -30,7 +30,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     email_plaintext_message = render_to_string("email/user_reset_password.txt", context)
 
     msg = EmailMultiAlternatives(
-        "Password Reset for {title}".format(title=settings.PROJECT_TITLE),
+        f"Password Reset for {settings.PROJECT_TITLE}",
         email_plaintext_message,
         settings.DEFAULT_FROM_EMAIL,
         [reset_password_token.user.email],

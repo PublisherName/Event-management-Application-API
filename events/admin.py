@@ -18,17 +18,20 @@ class EventAdmin(admin.ModelAdmin):
     list_filter = ("start_date", "end_date", "created_at", "updated_at", "is_verified")
     readonly_fields = ["created_by"]
 
-    def formatted_start_date(self, obj):
+    @staticmethod
+    def formatted_start_date(obj):
         return obj.start_date.strftime("%Y-%m-%d")
 
     formatted_start_date.short_description = "Start Date"
 
-    def formatted_end_date(self, obj):
+    @staticmethod
+    def formatted_end_date(obj):
         return obj.end_date.strftime("%Y-%m-%d")
 
     formatted_end_date.short_description = "End Date"
 
-    def formatted_created_at(self, obj):
+    @staticmethod
+    def formatted_created_at(obj):
         return obj.created_at.strftime("%Y-%m-%d")
 
     formatted_created_at.short_description = "Created At"

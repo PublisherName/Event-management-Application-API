@@ -19,7 +19,8 @@ class EventSerializer(serializers.ModelSerializer):
         except DjangoValidationError as e:
             raise serializers.ValidationError(e.message_dict)
 
-    def delete(self, instance, request):
+    @staticmethod
+    def delete(instance, request):
         if not (request.user == instance.created_by or request.user.is_superuser):
             raise PermissionDenied("You do not have permission to delete this event.")
         instance.delete()

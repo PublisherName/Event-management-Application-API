@@ -38,7 +38,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "confirm_password",
         )
 
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         if data["password"] != data["confirm_password"]:
             raise ValidationError("Passwords do not match.")
         if User.objects.filter(username=data["username"]).exists():
@@ -47,7 +48,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise ValidationError("Email already exists")
         return data
 
-    def create(self, validated_data):
+    @staticmethod
+    def create(validated_data):
         user = User.objects.create(
             username=validated_data["username"],
             email=validated_data["email"],
@@ -76,7 +78,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         email_plaintext_message = render_to_string("email/acc_active_email.txt", context)
 
         msg = EmailMultiAlternatives(
-            "Account activation for {title}".format(title=settings.PROJECT_TITLE),
+            f"Account activation for {settings.PROJECT_TITLE}",
             email_plaintext_message,
             settings.DEFAULT_FROM_EMAIL,
             [validated_data["email"]],
@@ -90,6 +92,10 @@ class UserActivationSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True, allow_blank=False)
     token = serializers.CharField(required=True, allow_blank=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user_token = None
+
     def validate(self, data):
         try:
             user = User.objects.get(email=data["email"])
@@ -102,10 +108,22 @@ class UserActivationSerializer(serializers.Serializer):
             raise serializers.ValidationError("User is already active.")
         return data
 
-    def save(self):
-        user = User.objects.get(email=self.validated_data["email"])
+    @staticmethod
+    def create(validated_data):
+        user = User.objects.get(email=validated_data["email"])
         user.is_active = True
         user.save()
+        return user
+
+    @staticmethod
+    def update(instance, validated_data):
+        """
+        Update and return an existing `User` instance, given the validated data.
+        """
+        instance.email = validated_data.get("email", instance.email)
+        instance.is_active = validated_data.get("is_active", instance.is_active)
+        instance.save()
+        return instance
 
     def delete(self):
         try:
@@ -122,7 +140,8 @@ class UserLoginSerializer(serializers.ModelSerializer):
         model = User
         fields = ("username", "password")
 
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         username = data["username"]
         password = data["password"]
 
@@ -147,7 +166,8 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
         model = User
         fields = ("password", "confirm_password", "old_password")
 
-    def validate(self, data):
+    @staticmethod
+    def validate(data):
         if data["password"] != data["confirm_password"]:
             raise ValidationError("Passwords do not match.")
         if data["password"] == data["old_password"]:

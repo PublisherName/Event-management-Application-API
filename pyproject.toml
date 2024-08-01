@@ -28,7 +28,8 @@ repository = "https://github.com/PublisherName/Event-management-Application-API"
 line-length = 99
 
 [tool.ruff.lint]
-extend-select = ["C", "E", "F","I001","Q","SIM", "T", "W"]
+preview=true
+extend-select = ["C", "E", "F", "I001", "PLR6301", "Q", "SIM", "T", "W"]
 ignore = ["F401"]
 exclude = ["**/migrations/*.py"]
 

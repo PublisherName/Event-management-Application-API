@@ -9,16 +9,10 @@ from events.models import Event
 
 
 @receiver(pre_save, sender=Event)
-def update_banner_filename(sender, instance, **kwargs):
+def update_banner_filename(instance, **kwargs):
     """Update the banner filename to a unique name before saving it to the storage."""
-    if instance.pk:
-        try:
-            old_instance = Event.objects.get(pk=instance.pk)
-            instance._old_banner = old_instance.banner
-        except Event.DoesNotExist:
-            instance._old_banner = None
-    else:
-        instance._old_banner = None
+
+    instance.old_banner = instance.old_banner
 
     if instance.banner:
         ext = instance.banner.name.split(".")[-1]
@@ -27,22 +21,23 @@ def update_banner_filename(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Event)
-def delete_old_banner(sender, instance, **kwargs):
+def delete_old_banner(instance, **kwargs):
     """Delete the old banner file from the storage when a new banner is uploaded."""
-    old_banner = getattr(instance, "_old_banner", None)
+    old_banner = instance.old_banner
+
     if old_banner and old_banner != instance.banner and default_storage.exists(old_banner.name):
         default_storage.delete(old_banner.name)
 
 
 @receiver(pre_delete, sender=Event)
-def delete_banner_file(sender, instance, **kwargs):
+def delete_banner_file(instance, **kwargs):
     """Delete the banner file from the storage when an event is deleted."""
     if instance.banner and default_storage.exists(instance.banner.name):
         default_storage.delete(instance.banner.name)
 
 
 @receiver(pre_delete, sender=Event)
-def restrict_event_deletion(sender, instance, **kwargs):
+def restrict_event_deletion(instance, **kwargs):
     """Restrict the deletion of an event if the user is not the creator or a superuser."""
     request = kwargs.get("request")
     if request:
@@ -52,6 +47,6 @@ def restrict_event_deletion(sender, instance, **kwargs):
 
 
 @receiver(pre_save, sender=Event)
-def validate_event(sender, instance, **kwargs):
+def validate_event(instance, **kwargs):
     """Validate the event instance before saving it to the database."""
     instance.full_clean()
