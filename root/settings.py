@@ -13,31 +13,23 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
-import environ
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Initialize environment variables
-env = environ.Env()
-
-# Read .env file if it exists
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = SECRET_KEY = env("DJANGO_SECRET_KEY")
+SECRET_KEY = SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEVELOPMENT") == "True"
-ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
+DEBUG = os.getenv("DEVELOPMENT") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
 
-PROJECT_TITLE = env("PROJECT_TITLE")
-FRONTEND_URL = env("FRONTEND_URL")
+PROJECT_TITLE = os.getenv("PROJECT_TITLE")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 # Application definition
@@ -155,7 +147,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # CORS
-allowed_origins = env("ALLOWED_ORIGINS")
+allowed_origins = os.getenv("ALLOWED_ORIGINS")
 CORS_ALLOWED_ORIGINS = allowed_origins.split(",") if allowed_origins else []
 
 REST_FRAMEWORK = {
@@ -182,9 +174,9 @@ SWAGGER_SETTINGS = {
 }
 
 # Email settings
-EMAIL_HOST = env("EMAIL_HOST")
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
-EMAIL_PORT = env("EMAIL_PORT")
-EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
