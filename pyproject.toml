@@ -26,15 +26,19 @@ repository = "https://github.com/PublisherName/Event-management-Application-API"
 
 [tool.ruff]
 line-length = 99
+force-exclude = true
+extend-exclude = ["migrations"]
 
 [tool.ruff.lint]
 preview=true
 extend-select = ["C", "E", "F", "I001", "PLR6301", "Q", "SIM", "T", "W"]
-ignore = ["F401"]
-exclude = ["**/migrations/*.py"]
 
 [tool.ruff.format]
-quote-style = "double"
 indent-style = "space"
 docstring-code-format = true
 docstring-code-line-length = 20
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "double"
+multiline-quotes = "double"
+docstring-quotes = "double"
