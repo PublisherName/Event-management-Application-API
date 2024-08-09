@@ -25,7 +25,7 @@ class UserRegistrationViewSet(viewsets.ViewSet):
             user = serializer.create(serializer.validated_data)
             if user:
                 return Response(
-                    {"status": "User created. Please verify email to activate acccount."},
+                    {"status": "User created. Please verify email to activate account."},
                     status=status.HTTP_201_CREATED,
                 )
             else:
