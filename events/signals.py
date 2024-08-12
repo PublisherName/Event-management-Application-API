@@ -1,11 +1,14 @@
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
+from django.core.mail import EmailMultiAlternatives
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
 
-from events.models import Event
+from events.models import Event, EventSignup
 
 
 @receiver(pre_save, sender=Event)
@@ -49,4 +52,33 @@ def restrict_event_deletion(instance, **kwargs):
 @receiver(pre_save, sender=Event)
 def validate_event(instance, **kwargs):
     """Validate the event instance before saving it to the database."""
+    instance.full_clean()
+
+
+@receiver(post_save, sender=EventSignup)
+def send_event_registration_email(instance, created, **kwargs):
+    """Send an email to the user after successfully signing up for an event."""
+    if created:
+        context = {
+            "user": instance.user,
+            "event": instance.event,
+            "current_year": instance.signup_date.year,
+        }
+
+        email_html_message = render_to_string("email/event/event_signup.html", context)
+        email_plaintext_message = render_to_string("email/event/event_signup.txt", context)
+
+        msg = EmailMultiAlternatives(
+            f"Registration for {instance.event.title}",
+            email_plaintext_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [instance.user.email],
+        )
+        msg.attach_alternative(email_html_message, "text/html")
+        msg.send()
+
+
+@receiver(pre_save, sender=EventSignup)
+def validate_eventSignup(instance, **kwargs):
+    """Validate the eventsignup instance before saving it to the database."""
     instance.full_clean()

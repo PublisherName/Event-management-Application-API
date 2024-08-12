@@ -74,8 +74,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             "token": token,
         }
 
-        email_html_message = render_to_string("email/acc_active_email.html", context)
-        email_plaintext_message = render_to_string("email/acc_active_email.txt", context)
+        email_html_message = render_to_string("email/user/acc_active_email.html", context)
+        email_plaintext_message = render_to_string("email/user/acc_active_email.txt", context)
 
         msg = EmailMultiAlternatives(
             f"Account activation for {settings.PROJECT_TITLE}",

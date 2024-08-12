@@ -26,8 +26,8 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
     }
 
     # render email text
-    email_html_message = render_to_string("email/user_reset_password.html", context)
-    email_plaintext_message = render_to_string("email/user_reset_password.txt", context)
+    email_html_message = render_to_string("email/user/user_reset_password.html", context)
+    email_plaintext_message = render_to_string("email/user/user_reset_password.txt", context)
 
     msg = EmailMultiAlternatives(
         f"Password Reset for {settings.PROJECT_TITLE}",
