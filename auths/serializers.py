@@ -1,15 +1,15 @@
-import base64
-
-from django.conf import settings
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django_rest_passwordreset.tokens import get_token_generator
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
-from auths.models import UserToken
+from auths.validators import (
+    validate_old_password,
+    validate_user_activation,
+    validate_user_change_password,
+    validate_user_login,
+    validate_user_registration,
+    validate_user_token_delete,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,13 +40,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate(data):
-        if data["password"] != data["confirm_password"]:
-            raise ValidationError("Passwords do not match.")
-        if User.objects.filter(username=data["username"]).exists():
-            raise ValidationError("Username already exists")
-        if User.objects.filter(email=data["email"]).exists():
-            raise ValidationError("Email already exists")
-        return data
+        return validate_user_registration(data)
 
     @staticmethod
     def create(validated_data):
@@ -59,32 +53,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         user.set_password(validated_data["password"])
         user.is_active = False
-        token = get_token_generator().generate_token(user)
-
-        UserToken.objects.create(user=user, token=token).save()
         user.save()
-
-        context = {
-            "activation_link": settings.FRONTEND_URL
-            + "/activate/"
-            + base64.b64encode(validated_data["email"].encode("utf-8")).decode("utf-8")
-            + "/"
-            + base64.b64encode(token.encode("utf-8")).decode("utf-8"),
-            "username": user.username,
-            "token": token,
-        }
-
-        email_html_message = render_to_string("email/user/acc_active_email.html", context)
-        email_plaintext_message = render_to_string("email/user/acc_active_email.txt", context)
-
-        msg = EmailMultiAlternatives(
-            f"Account activation for {settings.PROJECT_TITLE}",
-            email_plaintext_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [validated_data["email"]],
-        )
-        msg.attach_alternative(email_html_message, "text/html")
-        msg.send()
         return user
 
 
@@ -97,15 +66,7 @@ class UserActivationSerializer(serializers.Serializer):
         self.user_token = None
 
     def validate(self, data):
-        try:
-            user = User.objects.get(email=data["email"])
-            self.user_token = UserToken.objects.get(user=user, token=data["token"])
-        except User.DoesNotExist:
-            raise serializers.ValidationError("Invalid credentials.")
-        except UserToken.DoesNotExist:
-            raise serializers.ValidationError("Invalid credentials.")
-        if user.is_active:
-            raise serializers.ValidationError("User is already active.")
+        data, self.user_token = validate_user_activation(data)
         return data
 
     @staticmethod
@@ -126,10 +87,7 @@ class UserActivationSerializer(serializers.Serializer):
         return instance
 
     def delete(self):
-        try:
-            self.user_token.delete()
-        except UserToken.DoesNotExist:
-            raise serializers.ValidationError("Unable to clear user activation code.")
+        validate_user_token_delete(self.user_token)
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
@@ -142,19 +100,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate(data):
-        username = data["username"]
-        password = data["password"]
+        return validate_user_login(data)
 
-        if username and password:
-            user = authenticate(username=username, password=password)
-            if user:
-                if user.is_active:
-                    data["user"] = user
-                else:
-                    raise ValidationError("User is not active")
-        else:
-            raise ValidationError("Must provide username and password both")
-        return data
+    @staticmethod
+    def create(validated_data):
+        user = validated_data["user"]
+        token, _ = Token.objects.get_or_create(user=user)
+        return {"token": token.key}
 
 
 class UserChangePasswordSerializer(serializers.ModelSerializer):
@@ -168,15 +120,12 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def validate(data):
-        if data["password"] != data["confirm_password"]:
-            raise ValidationError("Passwords do not match.")
-        if data["password"] == data["old_password"]:
-            raise ValidationError("New password cannot be same as old password.")
+        validate_user_change_password(data)
         return data
 
-    def update(self, instance, validated_data):
-        if not self.instance.check_password(validated_data["old_password"]):
-            raise ValidationError("Old password is incorrect.")
+    @staticmethod
+    def update(instance, validated_data):
+        validate_old_password(instance, validated_data["old_password"])
         instance.set_password(validated_data["password"])
         instance.save()
         return instance

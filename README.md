@@ -37,3 +37,48 @@ python manage.py migrate
 ```bash
 python manage.py runserver
 ```
+
+## RabbitMQ , Celery Installation
+
+RabbitMQ and Celery are used in this project to handle asynchronous tasks and background job processing.
+
+1. Install RabbitMQ
+```bash
+sudo pacman -S rabbitmq
+```
+
+2. Start RabbitMQ
+```bash
+sudo systemctl start rabbitmq
+```
+
+3. Enable RabbitMQ
+```bash
+sudo systemctl enable rabbitmq
+```
+
+4. Creating a user
+```bash
+sudo rabbitmqctl add_user djangouser 'randompassword*1'
+```
+
+5. Create a virtual host
+```bash
+sudo rabbitmqctl add_vhost event_management
+```
+
+6. Set permissions
+```bash
+sudo rabbitmqctl set_permissions -p event_management djangouser ".*" ".*" ".*"
+```
+
+7. Export the environment variables
+```bash
+export CELERY_BROKER_URL=amqp://djangouser:randompassword*1@localhost:5672/event_management
+export CELERY_RESULT_BACKEND=rpc://
+```
+
+8. Run Celery
+```bash
+celery -A root worker --loglevel=info
+```

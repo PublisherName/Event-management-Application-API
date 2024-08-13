@@ -28,6 +28,8 @@ class Event(models.Model):
 
     class Meta:
         ordering = ["created_at"]
+        verbose_name = "List"
+        verbose_name_plural = "Lists"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,6 +64,8 @@ class EventSignup(models.Model):
     class Meta:
         unique_together = ("user", "event")
         ordering = ["signup_date"]
+        verbose_name = "Registration"
+        verbose_name_plural = "Registrations"
 
     def clean(self) -> None:
         validate_event_exists(self.event)

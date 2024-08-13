@@ -7,3 +7,4 @@ class AuthsConfig(AppConfig):
 
     def ready(self):  # noqa: PLR6301
         import auths.signals  # type: ignore # noqa: F401
+        import auths.validators  # type: ignore # noqa: F401
