@@ -3,8 +3,8 @@ from rest_framework import authentication, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Event
-from .serializers import EventSerializer
+from .models import Event, EventSignup
+from .serializers import EventSerializer, EventSignupSerializer
 
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -35,3 +35,19 @@ class EventViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer()
         serializer.delete(instance, request)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class EventSignupViewSet(viewsets.ModelViewSet):
+    serializer_class = EventSignupSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = EventSignup.objects.all().order_by("signup_date")
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return EventSignup.objects.all()
+        return EventSignup.objects.filter(user_id=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

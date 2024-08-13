@@ -1,15 +1,17 @@
 from django.contrib import admin
 from django.db.models import Q
 
-from .models import Event
+from .models import Event, EventSignup
 
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     list_display = (
         "title",
-        "formatted_start_date",
-        "formatted_end_date",
+        "start_date",
+        "end_date",
+        "start_time",
+        "end_time",
         "total_participants",
         "formatted_created_at",
         "is_verified",
@@ -17,18 +19,6 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ("title", "description", "location")
     list_filter = ("start_date", "end_date", "created_at", "updated_at", "is_verified")
     readonly_fields = ["created_by"]
-
-    @staticmethod
-    def formatted_start_date(obj):
-        return obj.start_date.strftime("%Y-%m-%d")
-
-    formatted_start_date.short_description = "Start Date"
-
-    @staticmethod
-    def formatted_end_date(obj):
-        return obj.end_date.strftime("%Y-%m-%d")
-
-    formatted_end_date.short_description = "End Date"
 
     @staticmethod
     def formatted_created_at(obj):
@@ -48,3 +38,14 @@ class EventAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(Q(created_by=request.user) | Q(is_verified=True))
+
+
+@admin.register(EventSignup)
+class EventSignupAdmin(admin.ModelAdmin):
+    list_display = ("user", "event", "signup_date")
+    search_fields = ("user", "event", "signup_date")
+    list_filter = (
+        "event",
+        "signup_date",
+    )
+    readonly_fields = ["signup_date"]
