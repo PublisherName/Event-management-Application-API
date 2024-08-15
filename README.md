@@ -82,3 +82,11 @@ export CELERY_RESULT_BACKEND=rpc://
 ```bash
 celery -A root worker --loglevel=info
 ```
+
+## Gunicorn
+Gunicorn is a WSGI HTTP server for UNIX. It is used to run the Django application in production.
+
+1. Run Gunicorn
+```bash
+doppler run -- gunicorn --config gunicorn_config.py root.wsgi:application
+```
