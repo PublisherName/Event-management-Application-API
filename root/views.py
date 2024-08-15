@@ -2,6 +2,10 @@ from django.http import JsonResponse
 from rest_framework import status
 
 
+def health_check(request):
+    return JsonResponse({"status": "ok"}, status=200)
+
+
 def error404(request, exception):
     return JsonResponse(
         {
