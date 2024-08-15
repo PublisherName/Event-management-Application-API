@@ -1,8 +1,6 @@
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import authentication, status, viewsets
-from rest_framework.authtoken.models import Token
+from rest_framework import authentication, serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -18,7 +16,7 @@ from auths.serializers import (
 class UserRegistrationViewSet(viewsets.ViewSet):
     serializer_class = UserRegistrationSerializer
 
-    @swagger_auto_schema(request_body=UserRegistrationSerializer)
+    @swagger_auto_schema(request_body=UserRegistrationSerializer, tags=["User Management"])
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -37,7 +35,7 @@ class UserRegistrationViewSet(viewsets.ViewSet):
 class UserActivationViewSet(viewsets.ViewSet):
     serializer_class = UserActivationSerializer
 
-    @swagger_auto_schema(request_body=UserActivationSerializer)
+    @swagger_auto_schema(request_body=UserActivationSerializer, tags=["User Management"])
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -50,20 +48,15 @@ class UserActivationViewSet(viewsets.ViewSet):
 class UserLoginViewSet(viewsets.ViewSet):
     serializer_class = UserLoginSerializer
 
-    @swagger_auto_schema(request_body=UserLoginSerializer)
+    @swagger_auto_schema(request_body=UserLoginSerializer, tags=["User Management"])
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data["username"]
-        password = serializer.validated_data["password"]
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            token, _ = Token.objects.get_or_create(user=user)
-            user.token = token
-            user.save()
-            return Response({"token": token.key})
-        else:
-            return Response({"details": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            response_data = serializer.save()
+            return Response(response_data, status=status.HTTP_200_OK)
+        except serializers.ValidationError as e:
+            return Response({"error": e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserDetailsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -71,14 +64,29 @@ class UserDetailsViewSet(viewsets.ReadOnlyModelViewSet):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(request_body=UserSerializer)
     def get_queryset(self):
         user = self.request.user
         token_user = self.request.auth.user if self.request.auth else None
         if user != token_user:
-            return Response({"details": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
+            return User.objects.none()
         return User.objects.filter(pk=self.request.user.pk)
+
+    @swagger_auto_schema(tags=["User Management"])
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(tags=["User Management"])
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class UserChangePasswordViewSet(viewsets.ViewSet):
@@ -86,16 +94,12 @@ class UserChangePasswordViewSet(viewsets.ViewSet):
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(request_body=UserChangePasswordSerializer)
+    @swagger_auto_schema(request_body=UserChangePasswordSerializer, tags=["User Management"])
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = authenticate(
-            username=request.user.username, password=serializer.validated_data["old_password"]
-        )
-        if user is not None:
-            user.set_password(serializer.validated_data["password"])
-            user.save()
+        try:
+            serializer.is_valid(raise_exception=True)
+            serializer.update(request.user, serializer.validated_data)
             return Response({"status": "Password changed"}, status=status.HTTP_200_OK)
-        else:
-            return Response({"details": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as e:
+            return Response({"error": e.detail}, status=status.HTTP_400_BAD_REQUEST)

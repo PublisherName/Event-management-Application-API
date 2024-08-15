@@ -1,14 +1,12 @@
 import uuid
 
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage
-from django.core.mail import EmailMultiAlternatives
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
-from django.template.loader import render_to_string
 
 from events.models import Event, EventSignup
+from root.tasks import send_email_task
 
 
 @receiver(pre_save, sender=Event)
@@ -59,23 +57,26 @@ def validate_event(instance, **kwargs):
 def send_event_registration_email(instance, created, **kwargs):
     """Send an email to the user after successfully signing up for an event."""
     if created:
+        email_title = f"Event Signup for {instance.event.title}"
+        email_template = {
+            "html": "email/event/event_signup.html",
+            "plaintext": "email/event/event_signup.txt",
+        }
         context = {
-            "user": instance.user,
-            "event": instance.event,
+            "user": instance.user.username,
+            "event": {
+                "title": instance.event.title,
+                "start_date": instance.event.start_date,
+                "end_date": instance.event.end_date,
+                "start_time": instance.event.start_time,
+                "end_time": instance.event.end_time,
+                "location": instance.event.location,
+                "latitude": instance.event.latitude,
+                "longitude": instance.event.longitude,
+            },
             "current_year": instance.signup_date.year,
         }
-
-        email_html_message = render_to_string("email/event/event_signup.html", context)
-        email_plaintext_message = render_to_string("email/event/event_signup.txt", context)
-
-        msg = EmailMultiAlternatives(
-            f"Registration for {instance.event.title}",
-            email_plaintext_message,
-            settings.DEFAULT_FROM_EMAIL,
-            [instance.user.email],
-        )
-        msg.attach_alternative(email_html_message, "text/html")
-        msg.send()
+        send_email_task.delay(email_template, instance.user.email, email_title, context)
 
 
 @receiver(pre_save, sender=EventSignup)
