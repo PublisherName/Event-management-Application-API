@@ -29,6 +29,7 @@ from rest_framework import permissions, routers
 
 from auths.urls import router as auths_urlpatterns
 from events.urls import router as events_urlpatterns
+from root.views import health_check
 
 router = routers.DefaultRouter()
 
@@ -51,6 +52,7 @@ urlpatterns = (
         path("admin/", admin.site.urls),
         path("", include(router.urls)),
         path("docs/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+        path("health/", health_check, name="health-check"),
     ]
     + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
