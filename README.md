@@ -1,5 +1,5 @@
 # EVENT MANAGEMENT APPLICATION API
-This is a simple event management application API that allows users to create, read, update and delete events. The API is built using Django Rest Framework.
+This is a simple event management application API that allows users to create, read, update, and delete events. The API is built using Django Rest Framework and utilizes Docker for containerization, RabbitMQ for message brokering, and Celery for task scheduling.
 
 ## Features
 - Create an event
@@ -17,68 +17,47 @@ git clone git@github.com:PublisherName/Event-management-Application-API.git
 ```bash
 cd Event-management-Application-API
 ```
-3. Create a virtual environment
+3. run docker compose
 ```bash
-python3 -m venv venv
-```
-4. Activate the virtual environment
-```bash
-source venv/bin/activate
-```
-5. Install the project dependencies
-```bash
-pip install -r requirements.txt
-```
-6. Migration
-```bash
-python manage.py migrate
-```
-7. Run the application
-```bash
-python manage.py runserver
+DOPPLER_TOKEN="your_doppler_token" docker-compose up
 ```
 
-## RabbitMQ , Celery Installation
+## Doppler Configuration
 
-RabbitMQ and Celery are used in this project to handle asynchronous tasks and background job processing.
+1. Create a new project in Doppler
 
-1. Install RabbitMQ
-```bash
-sudo pacman -S rabbitmq
+2. Create a new environment in the project
+
+3. Import the following variables in the environment
+
+```json
+{
+  "ALLOWED_HOSTS": "backend",
+  "ALLOWED_ORIGINS": "http://backend:8000",
+  "CELERY_BROKER_URL": "amqp://guest:guest@rabbitmq:5672//",
+  "CELERY_RESULT_BACKEND": "django-db",
+  "CSRF_COOKIE_SECURE": "False",
+  "DEFAULT_FROM_EMAIL": "email@email.com",
+  "DEVELOPMENT": "True",
+  "DJANGO_SECRET_KEY": "YOUR_DJANGO_SECRET_KEY",
+  "DOPPLER_TOKEN": "YOUR_DOPPLET_SERVICE_TOKEN",
+  "EMAIL_HOST": "EMAIL.HOST",
+  "EMAIL_HOST_PASSWORD": "EMAIL",
+  "EMAIL_HOST_USER": "HOST_USER",
+  "EMAIL_PORT": "2525",
+  "EMAIL_USE_TLS": "True",
+  "FRONTEND_URL": "http://frontend",
+  "PROJECT_TITLE": "Event Management System",
+  "SECURE_HSTS_INCLUDE_SUBDOMAINS": "True",
+  "SECURE_HSTS_PRELOAD": "False",
+  "SECURE_HSTS_SECONDS": "0",
+  "SECURE_SSL_REDIRECT": "False",
+  "SESSION_COOKIE_SECURE": "False"
+}
 ```
 
-2. Start RabbitMQ
-```bash
-sudo systemctl start rabbitmq
-```
+4. Add the doppler service token to the docker-compose command while running the application
 
-3. Enable RabbitMQ
 ```bash
-sudo systemctl enable rabbitmq
-```
-
-4. Creating a user
-```bash
-sudo rabbitmqctl add_user djangouser 'randompassword*1'
-```
-
-5. Create a virtual host
-```bash
-sudo rabbitmqctl add_vhost event_management
-```
-
-6. Set permissions
-```bash
-sudo rabbitmqctl set_permissions -p event_management djangouser ".*" ".*" ".*"
-```
-
-7. Export the environment variables
-```bash
-export CELERY_BROKER_URL=amqp://djangouser:randompassword*1@localhost:5672/event_management
-export CELERY_RESULT_BACKEND=rpc://
-```
-
-8. Run Celery
-```bash
-celery -A root worker --loglevel=info
+DOPPLER_TOKEN="your_doppler_token" docker-compose up
 ```

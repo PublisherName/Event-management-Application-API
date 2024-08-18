@@ -1,0 +1,94 @@
+services:
+  backend:
+    build:
+      context: .
+    container_name: backend
+    hostname: backend
+    restart: on-failure
+    volumes:
+      - .:/app
+      - static_volume:/app/public/static
+      - media_volume:/app/public/media
+    command: >
+      sh -c "doppler run -- python manage.py makemigrations --noinput &&
+            doppler run -- python manage.py migrate --noinput &&
+            doppler run -- python manage.py collectstatic --noinput &&
+            doppler run -- gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=2 root.wsgi"
+    stdin_open: true
+    depends_on:
+        rabbitmq:
+          condition: service_healthy
+    tty: true
+    networks:
+      - shared_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://backend:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    environment:
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN}
+
+  worker:
+    container_name: worker
+    build: .
+    restart: on-failure
+    command: >
+      sh -c "doppler run -- celery -A root worker --loglevel=info -s /tmp/celerybeat-schedule"
+    depends_on:
+        backend:
+          condition: service_healthy
+        rabbitmq:
+          condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "doppler run -- celery -A root inspect ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - shared_network
+    environment:
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN}
+
+  rabbitmq:
+    image: rabbitmq:3.13.6-management-alpine
+    container_name: rabbitmq
+    hostname: rabbit
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - shared_network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+  nginxrp:
+    container_name: nginxrp
+    restart: always
+    build: ./nginx-server
+    ports:
+      - 80:80
+    depends_on:
+      backend:
+        condition: service_healthy
+      worker:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - shared_network
+    volumes:
+      - static_volume:/app/public/static
+      - media_volume:/app/public/media
+
+volumes:
+  rabbitmq_data:
+  static_volume:
+  media_volume:
+
+networks:
+  shared_network:
+    driver: bridge
