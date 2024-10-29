@@ -8,7 +8,7 @@ click-didyoumean==0.3.1
 click-plugins==1.1.1
 click-repl==0.3.0
 distlib==0.3.8
-Django==5.1
+Django==5.1.1
 django-celery-results==2.5.1
 django-cors-headers==4.4.0
 django-rest-passwordreset==1.4.1
