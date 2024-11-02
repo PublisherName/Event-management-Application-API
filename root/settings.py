@@ -35,6 +35,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL")
 # Application definition
 
 INSTALLED_APPS = [
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -129,17 +130,17 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR_STATIC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 STATIC_URL = "/static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "public", "static")
+STATIC_ROOT = os.path.join(BASE_DIR_STATIC, "public", "static")
 
 
 # Media files (Images)
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "public", "media")
+MEDIA_ROOT = os.path.join(BASE_DIR_STATIC, "public", "media")
 
 
 # Default primary key field type
@@ -192,3 +193,75 @@ SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False") == "True"
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
+
+
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+        "file_sync": {
+            "level": "DEBUG",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": "./logs/custom.log",
+            "when": "D",
+            "interval": 1,
+            "backupCount": 5,
+            "formatter": "verbose",
+        },
+        "file_sql": {
+            "level": "DEBUG",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": "./logs/sql.log",
+            "when": "D",
+            "interval": 1,
+            "backupCount": 5,
+            "formatter": "verbose",
+        },
+        "file_django_error": {
+            "level": "ERROR",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": "./logs/django_error.log",
+            "when": "D",
+            "interval": 1,
+            "backupCount": 5,
+            "formatter": "django.server",
+        },
+    },
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s [%(levelname)s] %(message)s",
+        },
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
+            "style": "{",
+        },
+    },
+    "loggers": {
+        "CUSTOM_LOG": {
+            "handlers": ["file_sync", "console"] if DEBUG else ["file_sync"],
+            "level": "INFO" if DEBUG else "CRITICAL",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["file_sql"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["file_django_error"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
+
+JAZZMIN_SETTINGS = {
+    "show_ui_builder": True,
+}
