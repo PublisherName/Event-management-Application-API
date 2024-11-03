@@ -52,7 +52,8 @@ DOPPLER_TOKEN="your_doppler_token" docker-compose up
   "SECURE_HSTS_PRELOAD": "False",
   "SECURE_HSTS_SECONDS": "0",
   "SECURE_SSL_REDIRECT": "False",
-  "SESSION_COOKIE_SECURE": "False"
+  "SESSION_COOKIE_SECURE": "False",
+  "LOG_DIR": "logs"
 }
 ```
 

@@ -195,7 +195,7 @@ SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
 
 
-LOG_DIR = BASE_DIR / "logs"
+LOG_DIR = BASE_DIR / os.getenv("LOG_DIR")
 LOG_DIR.mkdir(exist_ok=True)
 
 LOGGING = {
