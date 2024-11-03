@@ -17,47 +17,13 @@ git clone git@github.com:PublisherName/Event-management-Application-API.git
 ```bash
 cd Event-management-Application-API
 ```
-3. run docker compose
+
+3. Copy the .env.example file to .env
 ```bash
-DOPPLER_TOKEN="your_doppler_token" docker-compose up
+cp .env.example .env
 ```
 
-## Doppler Configuration
-
-1. Create a new project in Doppler
-
-2. Create a new environment in the project
-
-3. Import the following variables in the environment
-
-```json
-{
-  "ALLOWED_HOSTS": "backend",
-  "ALLOWED_ORIGINS": "http://backend:8000",
-  "CELERY_BROKER_URL": "amqp://guest:guest@rabbitmq:5672//",
-  "CELERY_RESULT_BACKEND": "django-db",
-  "CSRF_COOKIE_SECURE": "False",
-  "DEFAULT_FROM_EMAIL": "email@email.com",
-  "DEVELOPMENT": "True",
-  "DJANGO_SECRET_KEY": "YOUR_DJANGO_SECRET_KEY",
-  "DOPPLER_TOKEN": "YOUR_DOPPLET_SERVICE_TOKEN",
-  "EMAIL_HOST": "EMAIL.HOST",
-  "EMAIL_HOST_PASSWORD": "EMAIL",
-  "EMAIL_HOST_USER": "HOST_USER",
-  "EMAIL_PORT": "2525",
-  "EMAIL_USE_TLS": "True",
-  "FRONTEND_URL": "http://frontend",
-  "PROJECT_TITLE": "Event Management System",
-  "SECURE_HSTS_INCLUDE_SUBDOMAINS": "True",
-  "SECURE_HSTS_PRELOAD": "False",
-  "SECURE_HSTS_SECONDS": "0",
-  "SECURE_SSL_REDIRECT": "False",
-  "SESSION_COOKIE_SECURE": "False"
-}
-```
-
-4. Add the doppler service token to the docker-compose command while running the application
-
+4. run docker compose
 ```bash
-DOPPLER_TOKEN="your_doppler_token" docker-compose up
+docker-compose up --build
 ```

@@ -1,5 +1,4 @@
 name: Main Workflow
-
 on:
   push:
     branches:
@@ -7,17 +6,17 @@ on:
   workflow_dispatch:
 
 jobs:
-    lint:
-      runs-on: ubuntu-latest
-      strategy:
-        matrix:
-          python-version: ["3.12"]
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
 
-      steps:
+    steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v5.3.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -26,106 +25,85 @@ jobs:
           pip install ruff
       - name: Analysing the code with ruff
         run: |
-          ruff check --config pyproject.toml $(git ls-files '*.py')
+          ruff check --config pyproject.toml "$(git ls-files '*.py')"
 
-    analyze:
-          runs-on: ubuntu-latest
-          needs: lint
-          permissions:
-            actions: read
-            contents: read
-            security-events: write
+  analyze:
+    runs-on: ubuntu-latest
+    needs: lint
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
-          strategy:
-            fail-fast: false
-            matrix:
-              language: ['python' ]
-          steps:
-          - name: Checkout repository
-            uses: actions/checkout@v3
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['python' ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-          - name: Initialize CodeQL
-            uses: github/codeql-action/init@v3
-            with:
-              languages: ${{ matrix.language }}
-              queries: security-and-quality
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
 
-          - name: Autobuild
-            uses: github/codeql-action/autobuild@v2
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
 
-          - name: Perform CodeQL Analysis
-            uses: github/codeql-action/analyze@v2
-            with:
-              category: "/language:${{matrix.language}}"
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
 
-    build:
-      runs-on: ubuntu-latest
-      needs: analyze
+  build:
+    runs-on: ubuntu-latest
+    needs: analyze
 
-      steps:
-        - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Set up Python version
-          uses: actions/setup-python@v5
-          with:
-            python-version: '3.12'
+      - name: Set up Python version
+        uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.12'
 
-        - name: Create and start virtual environment
-          run: |
-            python -m venv venv
-            source venv/bin/activate
+      - name: Create and start virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
 
-        - name: Install dependencies
-          run: pip install -r requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
-        - name: Install Doppler CLI
-          uses: dopplerhq/cli-action@v3
+      - name: Add sample .env file
+        run: |
+          if [ ! -f env.example ]; then
+            echo "Error: .env.example file not found"
+            exit 1
+          fi
+          cp env.example .env || { echo "Error: Failed to copy .env file"; exit 1; }
 
-        - name : Migrate Database and Collect Static
-          run: |
-            doppler run -- python manage.py makemigrations --noinput
-            doppler run -- python manage.py migrate --noinput
-            doppler run -- python manage.py collectstatic --noinput
-          env :
-            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      - name: Migrate Database and Collect Static
+        run: |
+          python manage.py makemigrations --noinput
+          python manage.py migrate --noinput
+          python manage.py collectstatic --noinput
 
-        - name: Run Tests
-          run: |
-            doppler run -- python manage.py test
-          env:
-            DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      - name: Run Tests
+        run: |
+          python manage.py test
 
-        - name: Zip artifact for deployment
-          run: zip release.zip ./* -r
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
 
-        - name: Upload artifact for deployment jobs
-          uses: actions/upload-artifact@v4
-          with:
-            name: python-app
-            path: |
-              release.zip
-              !venv/**
-
-    deploy:
-      runs-on: ubuntu-latest
-      needs: build
-      environment:
-        name: 'Production'
-        url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-      steps:
-        - name: Download artifact from build job
-          uses: actions/download-artifact@v4
-          with:
-            name: python-app
-
-        - name: Unzip artifact for deployment
-          run: unzip release.zip
-
-        - name: 'Deploy to Azure Web App'
-          uses: azure/webapps-deploy@v3
-          id: deploy-to-webapp
-          with:
-            app-name: 'event-subash'
-            slot-name: 'Production'
-            publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C9B403BF59794F6490DC93D63BD17008 }}
+      - name: Upload artifact for deployment jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-app
+          path: |
+            release.zip
+            !venv/**
+            !.env
+            !*.env
