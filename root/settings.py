@@ -13,9 +13,17 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env_path = BASE_DIR / ".env"
+if not env_path.exists():
+    import warnings
+
+    warnings.warn(f"No .env file found at {env_path}. Using default values.")
+load_dotenv(dotenv_path=env_path)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -194,9 +202,14 @@ SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
 
-
-LOG_DIR = BASE_DIR / os.getenv("LOG_DIR")
-LOG_DIR.mkdir(exist_ok=True)
+# Logging settings
+LOG_DIR = BASE_DIR / os.getenv("LOG_DIR", "logs")
+try:
+    LOG_DIR.mkdir(exist_ok=True, parents=True)
+    if not os.access(LOG_DIR, os.W_OK):
+        raise PermissionError(f"No write permission for log directory: {LOG_DIR}")
+except Exception as e:
+    raise RuntimeError(f"Failed to setup log directory: {e}")
 
 LOGGING = {
     "version": 1,
@@ -208,7 +221,7 @@ LOGGING = {
         "file_sync": {
             "level": "DEBUG",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "./logs/custom.log",
+            "filename": str(LOG_DIR / "custom.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 5,
@@ -217,7 +230,7 @@ LOGGING = {
         "file_sql": {
             "level": "DEBUG",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "./logs/sql.log",
+            "filename": str(LOG_DIR / "sql.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 5,
@@ -226,7 +239,7 @@ LOGGING = {
         "file_django_error": {
             "level": "ERROR",
             "class": "logging.handlers.TimedRotatingFileHandler",
-            "filename": "./logs/django_error.log",
+            "filename": str(LOG_DIR / "django_error.log"),
             "when": "D",
             "interval": 1,
             "backupCount": 5,
