@@ -271,6 +271,24 @@ LOGGING = {
     },
 }
 
+# Jazzmin settings
 JAZZMIN_SETTINGS = {
     "show_ui_builder": True,
 }
+
+# Celery settings
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = os.getenv(
+    "CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP", default=True
+)
+CELERY_TASK_IGNORE_RESULT = os.getenv("CELERY_TASK_IGNORE_RESULT", default=False)
+CELERY_EMAIL_TASK_CONFIG = {
+    "ignore_result": os.getenv("CELERY_EMAIL_TASK_IGNORE_RESULT", default=False)
+}
+CELERY_EMAIL_CHUNK_SIZE = os.getenv("CELERY_EMAIL_CHUNK_SIZE", default=1)
+CELERY_TASK_SERIALIZER = os.getenv("CELERY_TASK_SERIALIZER", default="json")
+CELERY_RESULT_SERIALIZER = os.getenv("CELERY_RESULT_SERIALIZER", default="json")
+CELERY_RESULT_EXTENDED = os.getenv("CELERY_RESULT_EXTENDED", default=True)
+CELERY_TIMEZONE = os.getenv("CELERY_TIMEZONE", default="Asia/Kathmandu")
+CELERY_ENABLE_UTC = os.getenv("CELERY_ENABLE_UTC", default=True)

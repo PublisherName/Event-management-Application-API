@@ -39,6 +39,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2024.2
 PyYAML==6.0.2
+redis==5.2.0
 regex==2024.9.11
 ruff==0.7.2
 setuptools==75.3.0
