@@ -104,6 +104,19 @@ DATABASES = {
     },
 }
 
+# Cache settings
+CACHES = {
+    "default": {
+        "BACKEND": os.getenv("CACHE_BACKEND", default="django_redis.cache.RedisCache"),
+        "LOCATION": os.getenv("CACHE_LOCATION", default="redis://127.0.0.1:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": os.getenv(
+                "CACHE_CLIENT_CLASS", default="django_redis.client.DefaultClient"
+            ),
+        },
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
