@@ -86,6 +86,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Add sample .env file
+        run: |
+          if [ ! -f env.example ]; then
+            echo "Error: .env.example file not found"
+            exit 1
+          fi
+          cp env.example .env || { echo "Error: Failed to copy .env file"; exit 1; }
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v3
         with:
