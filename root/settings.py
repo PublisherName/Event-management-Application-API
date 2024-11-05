@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "events",
     "celery",
     "django_celery_results",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -292,3 +293,6 @@ CELERY_RESULT_SERIALIZER = os.getenv("CELERY_RESULT_SERIALIZER", default="json")
 CELERY_RESULT_EXTENDED = os.getenv("CELERY_RESULT_EXTENDED", default=True)
 CELERY_TIMEZONE = os.getenv("CELERY_TIMEZONE", default="Asia/Kathmandu")
 CELERY_ENABLE_UTC = os.getenv("CELERY_ENABLE_UTC", default=True)
+CELERY_BEAT_SCHEDULER = os.getenv(
+    "CELERY_BEAT_SCHEDULER", default="django_celery_beat.schedulers:DatabaseScheduler"
+)
