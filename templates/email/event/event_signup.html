@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Signup Confirmation</title>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Event Signup Confirmation</title>
+        <meta name="description"
+              content="Thank you for signing up for the event. Here are the details of the event you registered for.">
+        <meta name="keywords"
+              content="event, signup, confirmation, details, location, date, time">
+        <style>
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
@@ -38,32 +41,44 @@
             text-align: center;
             color: #777;
         }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Event Signup Confirmation</h1>
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Event Signup Confirmation</h1>
+            </div>
+            <div class="content">
+                <p>Dear {{ user.username }},</p>
+                <p>
+                    Thank you for signing up for the event <strong>{{ event.title }}</strong>.
+                </p>
+                <p>Event Details:</p>
+                <ul>
+                    <li>
+                        <strong>Title:</strong> {{ event.title }}
+                    </li>
+                    <li>
+                        <strong>Start Date:</strong> {{ event.start_date }}
+                    </li>
+                    <li>
+                        <strong>End Date:</strong> {{ event.end_date }}
+                    </li>
+                    <li>
+                        <strong>Start Time:</strong> {{ event.start_time }} - {{ event.end_time }}
+                    </li>
+                    <li>
+                        <strong>Location:</strong> {{ event.location }}
+                    </li>
+                    <li>
+                        <strong>Coordinates:</strong> {{ event.latitude }} , {{ event.longitude }}
+                    </li>
+                </ul>
+                <p>We look forward to seeing you there!</p>
+            </div>
+            <div class="footer">
+                <p>© {{ current_year }} Event Management. All rights reserved.</p>
+            </div>
         </div>
-        <div class="content">
-            <p>Dear {{ user.username }},</p>
-            <p>Thank you for signing up for the event <strong>{{ event.title }}</strong>.</p>
-            <p>Event Details:</p>
-            <ul>
-                <li><strong>Title:</strong> {{ event.title }}</li>
-                <li><strong>Start Date:</strong> {{ event.start_date }}</li>
-                <li><strong>End Date:</strong> {{ event.end_date }}</li>
-                <li><strong>Start Time:</strong> {{ event.start_time }} - {{event.end_time}}</li>
-                <li><strong>Location:</strong> {{ event.location }}</li>
-                <li><strong>Coordinates:</strong> {{ event.latitude }} , {{ event.longitude}}</li>
-            </ul>
-            <p>We look forward to seeing you there!</p>
-        </div>
-        <div class="footer">
-            <p>&copy; {{ current_year }} Event Management. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-
+    </body>
 </html>

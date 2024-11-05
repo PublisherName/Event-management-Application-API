@@ -1,46 +1,75 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="UTF-8">
-    <title>Account Verification</title>
-</head>
-
-<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#f4f4f4">
-        <tr>
-            <td>
-                <table align="center" width="600" cellpadding="0" cellspacing="0" border="0"
-                    style="background-color: #ffffff; margin-top: 30px; border-radius: 6px;">
-                    <tr>
-                        <td>
-                            <table width="100%" cellpadding="20" cellspacing="0" border="0">
-                                <tr>
-                                    <td>
-                                        <h1 style="color: #333; font-size: 24px;">Account Verification</h1>
-                                        <p>Hello {{username}},</p>
-                                        <p>Your verification token to EMS is:</p>
-
-                                        <p><b>
-                                                <center>{{token}}</center>
-                                            </b></p>
-
-                                        <p><b>
-                                                <center><a href="{{activation_link}}">Activate Account</a></center>
-                                            </b></p>
-
-                                        <p>Thank you for choosing EMS. If you need assistance, contact us.</p>
-
-                                        <p>Best regards,<br> <br>Event Management System</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Account Verification</title>
+        <meta name="description"
+              content="Account activation instructions for your Event Management System account.">
+        <meta name="keywords"
+              content="account activation, verification, registration">
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            background-color: #ffffff;
+            margin-top: 30px;
+            border-radius: 6px;
+            width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .email-header {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .email-content {
+            padding: 20px;
+        }
+        .verification-token,
+        .activation-link {
+            display: block;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        </style>
+    </head>
+    <body>
+        <table width="100%"
+               cellpadding="0"
+               cellspacing="0"
+               border="0"
+               bgcolor="#f4f4f4">
+            <tr>
+                <td>
+                    <table class="email-container" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                            <td class="email-content">
+                                <h1 class="email-header">Account Verification</h1>
+                                <p>Hello {{ username }},</p>
+                                <p>Your verification token to EMS is:</p>
+                                <p class="verification-token">{{ token }}</p>
+                                <p class="activation-link">
+                                    <a href="{{ activation_link }}">Activate Account</a>
+                                </p>
+                                <p>Thank you for choosing EMS. If you need assistance, contact us.</p>
+                                <p>
+                                    Best regards,
+                                    <br>
+                                    <br>
+                                    Event Management System
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
 </html>
