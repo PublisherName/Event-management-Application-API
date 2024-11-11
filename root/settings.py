@@ -9,57 +9,66 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-import os
 from pathlib import Path
 
-from dotenv import load_dotenv
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env_path = BASE_DIR / ".env"
-if not env_path.exists():
-    import warnings
-
-    env_warning_message = f"No .env file found at {env_path}. Using default values."
-    warnings.warn(env_warning_message, stacklevel=2)
-load_dotenv(dotenv_path=env_path)
+env = environ.Env()
+environ.Env.read_env(str(BASE_DIR / ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEVELOPMENT") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(",")
+DEBUG = env.bool("DJANGO_DEBUG", default=False)
+ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
 
-PROJECT_TITLE = os.getenv("PROJECT_TITLE")
-FRONTEND_URL = os.getenv("FRONTEND_URL")
+PROJECT_TITLE = env("PROJECT_TITLE")
+FRONTEND_URL = env.url("FRONTEND_URL")
 
 
-# Application definition
-
-INSTALLED_APPS = [
+# Admin Interface
+ADMIN_APPS = [
     "jazzmin",
     "django.contrib.admin",
+]
+
+# Django Core Apps
+DJANGO_CORE_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+# Third-Party Apps
+THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_rest_passwordreset",
     "corsheaders",
     "drf_yasg",
+    "django_celery_results",
+    "django_celery_beat",
+]
+
+# Project Apps
+PROJECT_APPS = [
     "auths",
     "events",
-    "celery",
-    "django_celery_results",
 ]
+
+# Combining all app groups
+INSTALLED_APPS = ADMIN_APPS + DJANGO_CORE_APPS + THIRD_PARTY_APPS + PROJECT_APPS
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -103,6 +112,20 @@ DATABASES = {
     },
 }
 
+# Cache settings
+CACHES = {
+    "default": {
+        "BACKEND": env("CACHE_BACKEND"),
+        "LOCATION": env("CACHE_LOCATION"),
+        "OPTIONS": {
+            "CLIENT_CLASS": env("CACHE_CLIENT_CLASS"),
+            "SOCKET_CONNECT_TIMEOUT": env.int("CACHE_SOCKET_CONNECT_TIMEOUT", default=2),
+            "SOCKET_TIMEOUT": env.int("CACHE_SOCKET_TIMEOUT", default=2),
+        },
+        "TIMEOUT": env.int("CACHE_TIMEOUT", default=300),
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -130,7 +153,8 @@ LANGUAGE_CODE = "en-us"
 
 USE_I18N = True
 
-TIME_ZONE = "Asia/Kathmandu"
+# Configure local timezone
+TIME_ZONE = env("TIMEZONE")
 
 USE_TZ = True
 
@@ -139,12 +163,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "public" / "static"
+STATIC_ROOT = BASE_DIR / env.path("STATIC_ROOT")
 
 # Media files (Images)
-
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "public" / "media"
+MEDIA_ROOT = BASE_DIR / env.path("MEDIA_ROOT")
 
 
 # Default primary key field type
@@ -154,9 +177,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # CORS
-allowed_origins = os.getenv("ALLOWED_ORIGINS")
+allowed_origins = env("ALLOWED_ORIGINS")
 CORS_ALLOWED_ORIGINS = allowed_origins.split(",") if allowed_origins else []
 
+# Django Rest Framework
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
@@ -174,6 +198,7 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
     },
 }
 
+# Swagger settings
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {"basic": {"type": "basic"}},
     "LOGIN_URL": None,
@@ -181,31 +206,27 @@ SWAGGER_SETTINGS = {
 }
 
 # Email settings
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
-EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
+EMAIL_HOST = env("EMAIL_HOST")
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
+EMAIL_PORT = env.int("EMAIL_PORT")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
 
 # Enable HSTS
-SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False") == "True"
-SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False") == "True"
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
+SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", False)
 
 # Other security settings
-SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
-SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
-CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", False)
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", False)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", False)
+
 
 # Logging settings
-LOG_DIR = BASE_DIR / os.getenv("LOG_DIR", "logs")
-try:
-    LOG_DIR.mkdir(exist_ok=True, parents=True)
-    if not os.access(LOG_DIR, os.W_OK):
-        raise PermissionError(f"No write permission for log directory: {LOG_DIR}")
-except Exception as e:
-    raise RuntimeError(f"Failed to setup log directory: {e}")
+LOG_DIR = BASE_DIR / env.path("LOG_DIR", default="logs")
+LOG_DIR.mkdir(exist_ok=True, parents=True)
 
 LOGGING = {
     "version": 1,
@@ -271,6 +292,32 @@ LOGGING = {
     },
 }
 
+# Jazzmin settings
 JAZZMIN_SETTINGS = {
-    "show_ui_builder": True,
+    "show_ui_builder": env.bool("JAZZMIN_UI_BUILDER", False),
 }
+
+# Broker and Backend Configuration : Celery
+CELERY_BROKER_URL = env.url("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = env.url("CELERY_RESULT_BACKEND")
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = env.bool(
+    "CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP", default=True
+)
+
+# Task Execution Settings : Celery
+CELERY_TASK_IGNORE_RESULT = env.bool("CELERY_TASK_IGNORE_RESULT", default=False)
+CELERY_TASK_SERIALIZER = env("CELERY_TASK_SERIALIZER")
+CELERY_RESULT_SERIALIZER = env("CELERY_RESULT_SERIALIZER")
+CELERY_RESULT_EXTENDED = env.bool("CELERY_RESULT_EXTENDED", default=True)
+
+# Email Task Configuration : Celery
+CELERY_EMAIL_TASK_CONFIG = {
+    "ignore_result": env.bool("CELERY_EMAIL_TASK_IGNORE_RESULT", default=False)
+}
+CELERY_EMAIL_CHUNK_SIZE = env.int("CELERY_EMAIL_CHUNK_SIZE", default=1)
+
+# Timezone and Scheduling : Celery
+CELERY_TIMEZONE = env("TIMEZONE")
+CELERY_ENABLE_UTC = env.bool("CELERY_ENABLE_UTC", default=True)
+CELERY_BEAT_SCHEDULER = env("CELERY_BEAT_SCHEDULER")
+CELERY_TASK_DEFAULT_RATE_LIMIT = env("CELERY_TASK_RATE_LIMIT", default="10/m")
