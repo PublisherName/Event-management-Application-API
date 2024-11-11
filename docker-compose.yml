@@ -9,6 +9,7 @@ services:
       - .:/app
       - static_volume:/app/public/static
       - media_volume:/app/public/media
+      - log_volume:/app/logs
     command: >
       sh -c "python manage.py makemigrations --noinput &&
             python manage.py migrate --noinput &&
@@ -16,7 +17,7 @@ services:
             gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=2 root.wsgi"
     stdin_open: true
     depends_on:
-      rabbitmq:
+      redis:
         condition: service_healthy
     tty: true
     networks:
@@ -38,7 +39,7 @@ services:
     depends_on:
       backend:
         condition: service_healthy
-      rabbitmq:
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "celery -A root inspect ping"]
@@ -49,16 +50,16 @@ services:
     networks:
       - shared_network
 
-  rabbitmq:
-    image: rabbitmq:3.13.6-management-alpine
-    container_name: rabbitmq
-    hostname: rabbit
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    restart: always
     networks:
       - shared_network
+    volumes:
+      - redis_data:/data
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 3
@@ -74,18 +75,20 @@ services:
         condition: service_healthy
       worker:
         condition: service_healthy
-      rabbitmq:
+      redis:
         condition: service_healthy
     networks:
       - shared_network
     volumes:
       - static_volume:/app/public/static
       - media_volume:/app/public/media
+      - log_volume:/app/logs
 
 volumes:
-  rabbitmq_data:
+  redis_data:
   static_volume:
   media_volume:
+  log_volume:
 
 networks:
   shared_network:
