@@ -35,7 +35,7 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "celery -A root worker --loglevel=info -s /tmp/celerybeat-schedule"
+      sh -c "celery -A root worker --loglevel=info"
     depends_on:
       backend:
         condition: service_healthy
@@ -47,6 +47,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+    volumes: [.:/app]
     networks:
       - shared_network
 

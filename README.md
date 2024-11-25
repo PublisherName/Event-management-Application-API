@@ -27,3 +27,10 @@ cp .env.example .env
 ```bash
 docker-compose up --build
 ```
+
+5. Create a superuser
+```bash
+docker compose exec backend python manage.py createsuperuser
+```
+
+6. Access the API at http://127.0.0.1
