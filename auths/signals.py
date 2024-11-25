@@ -36,7 +36,7 @@ def password_reset_token_created(reset_password_token, *args, **kwargs):
 
 @receiver(post_save, sender=User)
 def send_activation_email(instance, created, **kwargs):
-    if created:
+    if created and not instance.is_active:
         token = get_token_generator().generate_token(instance)
         UserToken.objects.create(user=instance, token=token).save()
 
