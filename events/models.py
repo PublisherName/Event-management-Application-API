@@ -33,15 +33,6 @@ class Event(models.Model):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._old_banner = self.banner
-
-    @property
-    def old_banner(self):
-        return self._old_banner
-
-    @old_banner.setter
-    def old_banner(self, value):
-        self._old_banner = value
 
     def clean(self):
         super().clean()

@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.db.models import Q
 
+from root.base_admin import SummernoteModelAdmin  # type: ignore
+
 from .models import Event, EventSignup
 
 
 @admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
     list_display = (
         "title",
         "start_date",
