@@ -58,6 +58,8 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "django_celery_results",
     "django_celery_beat",
+    "django_summernote",
+    "django_cleanup.apps.CleanupConfig",
 ]
 
 # Project Apps
@@ -79,6 +81,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "root.middleware.FileRenameMiddleware",
 ]
 
 ROOT_URLCONF = "root.urls"
@@ -321,3 +324,31 @@ CELERY_TIMEZONE = env("TIMEZONE")
 CELERY_ENABLE_UTC = env.bool("CELERY_ENABLE_UTC", default=True)
 CELERY_BEAT_SCHEDULER = env("CELERY_BEAT_SCHEDULER")
 CELERY_TASK_DEFAULT_RATE_LIMIT = env("CELERY_TASK_RATE_LIMIT", default="10/m")
+
+# Django Summernote Configuration
+SUMMERNOTE_CONFIG = {
+    "summernote": {
+        "width": "100%",
+        "height": "480",
+        "toolbar": [
+            ["style", ["style"]],
+            ["font", ["bold", "italic", "underline", "clear"]],
+            ["fontname", ["fontname"]],
+            ["color", ["color"]],
+            ["para", ["ul", "ol", "paragraph"]],
+            ["table", ["table"]],
+            ["insert", ["link", "picture", "video"]],
+            ["view", ["fullscreen", "codeview"]],
+        ],
+    },
+    # Require users to be authenticated for uploading attachments.
+    "attachment_require_authentication": True,
+    # Set custom storage class for attachments.
+    "attachment_storage_class": ("django.core.files.storage.FileSystemStorage"),
+    # Set to `False` to return attachment paths in relative URIs.
+    "attachment_absolute_uri": True,
+    # Delete attachments from storage when removing them from the editor.
+    "attachment_file_removal": True,
+    # Delete files from storage when attachments are removed
+    "attachment_cleanup": True,
+}
