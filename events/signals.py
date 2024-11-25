@@ -1,26 +1,9 @@
 from django.core.exceptions import PermissionDenied
-from django.core.files.storage import default_storage
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from events.models import Event, EventSignup
 from root.tasks import send_email_task
-
-
-@receiver(post_save, sender=Event)
-def delete_old_banner(instance, **kwargs):
-    """Delete the old banner file from the storage when a new banner is uploaded."""
-    old_banner = instance.old_banner
-
-    if old_banner and old_banner != instance.banner and default_storage.exists(old_banner.name):
-        default_storage.delete(old_banner.name)
-
-
-@receiver(pre_delete, sender=Event)
-def delete_banner_file(instance, **kwargs):
-    """Delete the banner file from the storage when an event is deleted."""
-    if instance.banner and default_storage.exists(instance.banner.name):
-        default_storage.delete(instance.banner.name)
 
 
 @receiver(pre_delete, sender=Event)
