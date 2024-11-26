@@ -13,6 +13,7 @@ services:
     command: >
       sh -c "python manage.py makemigrations --noinput &&
             python manage.py migrate --noinput &&
+            python manage.py seed_preferences &&
             python manage.py collectstatic --noinput &&
             gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=2 root.wsgi"
     stdin_open: true

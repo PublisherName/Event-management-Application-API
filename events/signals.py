@@ -3,6 +3,8 @@ from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
 from events.models import Event, EventSignup
+from preferences.enums import EmailTemplateType
+from preferences.models import EmailTemplate
 from root.tasks import send_email_task
 
 
@@ -26,11 +28,19 @@ def validate_event(instance, **kwargs):
 def send_event_registration_email(instance, created, **kwargs):
     """Send an email to the user after successfully signing up for an event."""
     if created:
-        email_title = f"Event Signup for {instance.event.title}"
+        event_signup_template = EmailTemplate.get_email_template_by_type(
+            EmailTemplateType.EVENT_SIGNUP
+        )
+
+        if not event_signup_template:
+            raise ValueError("Event signup email template not found")
+
         email_template = {
-            "html": "email/event/event_signup.html",
-            "plaintext": "email/event/event_signup.txt",
+            "html": event_signup_template.body_html,
+            "plaintext": event_signup_template.body_plaintext,
         }
+        email_title = event_signup_template.subject
+
         context = {
             "user": instance.user.username,
             "event": {

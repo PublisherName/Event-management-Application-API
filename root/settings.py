@@ -66,6 +66,7 @@ THIRD_PARTY_APPS = [
 PROJECT_APPS = [
     "auths",
     "events",
+    "preferences",
 ]
 
 # Combining all app groups
@@ -89,7 +90,7 @@ ROOT_URLCONF = "root.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["templates"],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
