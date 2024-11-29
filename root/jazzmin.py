@@ -26,11 +26,43 @@ JAZZMIN_SETTINGS = {
     "usermenu_links": [
         {"model": "auth.user"},
     ],
+    "custom_links": {
+        "auth": [
+            {
+                "name": "Login Tokens",
+                "model": "rest_framework.authtoken.TokenProxy",
+                "app_label": "auth",
+                "url": "/admin/authtoken/tokenproxy/",
+                "icon": "fas fa-user-lock",
+                "permissions": ["auth.is_superuser", "auth.is_staff"],
+            },
+            {
+                "name": "Activation Tokens",
+                "model": "auths.UserActivationToken",
+                "app_label": "auths",
+                "url": "/admin/auths/useractivationtoken/",
+                "icon": "fas fa-user-check",
+                "permissions": ["auth.is_superuser", "auth.is_staff"],
+            },
+            {
+                "name": "Reset Tokens",
+                "model": "django_rest_passwordreset.ResetPasswordToken",
+                "app_label": "auth",
+                "url": "/admin/django_rest_passwordreset/resetpasswordtoken/",
+                "icon": "fas fa-unlock-alt",
+                "permissions": ["auth.is_superuser", "auth.is_staff"],
+            },
+        ],
+    },
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
-    "hide_models": [],
-    "order_with_respect_to": ["auth", "events", "preferences", "django_summernote"],
+    "hide_models": [
+        "django_rest_passwordreset.ResetPasswordToken",
+        "authtoken.TokenProxy",
+        "auths.UserActivationToken",
+    ],
+    "order_with_respect_to": ["auth", "auths", "events", "preferences", "django_summernote"],
     "icons": {
         # Auth icons
         "auth": "fas fa-users-cog",
@@ -57,6 +89,9 @@ JAZZMIN_SETTINGS = {
         # Preferences icons
         "preferences": "fas fa-cogs",
         "preferences.emailtemplate": "fas fa-envelope",
+        # User Activation Token icons
+        "auths": "fas fa-key",
+        "auths.useractivationtoken": "fas fa-key",
     },
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
