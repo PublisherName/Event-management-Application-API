@@ -13,6 +13,8 @@ from pathlib import Path
 
 import environ
 
+from .jazzmin import JAZZMIN_SETTINGS
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -166,6 +168,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / env.path("STATIC_ROOT")
 
@@ -297,9 +303,7 @@ LOGGING = {
 }
 
 # Jazzmin settings
-JAZZMIN_SETTINGS = {
-    "show_ui_builder": env.bool("JAZZMIN_UI_BUILDER", False),
-}
+JAZZMIN_SETTINGS = JAZZMIN_SETTINGS
 
 # Broker and Backend Configuration : Celery
 CELERY_BROKER_URL = env.url("CELERY_BROKER_URL")
