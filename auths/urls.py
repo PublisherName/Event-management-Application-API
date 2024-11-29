@@ -41,7 +41,9 @@ router.register(r"login", UserLoginViewSet, basename="login")
 
 router.register(r"forgot-password", ResetPasswordRequestTokenViewSet, basename="forgot-password")
 
-router.register(r"validate_token", ResetPasswordValidateTokenViewSet, basename="validate-token")
+router.register(
+    r"validate-password-reset-token", ResetPasswordValidateTokenViewSet, basename="validate-token"
+)
 
 router.register(r"reset-password", ResetPasswordConfirmViewSet, basename="reset-password")
 
