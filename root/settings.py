@@ -9,15 +9,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
-
-import environ
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env()
-environ.Env.read_env(str(BASE_DIR / ".env"))
+from .env_config import BASE_DIR, env
+from .jazzmin import JAZZMIN_SETTINGS_CONFIG
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -166,6 +159,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / env.path("STATIC_ROOT")
 
@@ -297,9 +294,7 @@ LOGGING = {
 }
 
 # Jazzmin settings
-JAZZMIN_SETTINGS = {
-    "show_ui_builder": env.bool("JAZZMIN_UI_BUILDER", False),
-}
+JAZZMIN_SETTINGS = JAZZMIN_SETTINGS_CONFIG
 
 # Broker and Backend Configuration : Celery
 CELERY_BROKER_URL = env.url("CELERY_BROKER_URL")
