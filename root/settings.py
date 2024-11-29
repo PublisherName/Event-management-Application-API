@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from .env_config import BASE_DIR, env
-from .jazzmin import JAZZMIN_SETTINGS
+from .jazzmin import JAZZMIN_SETTINGS_CONFIG
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -294,7 +294,7 @@ LOGGING = {
 }
 
 # Jazzmin settings
-JAZZMIN_SETTINGS = JAZZMIN_SETTINGS
+JAZZMIN_SETTINGS = JAZZMIN_SETTINGS_CONFIG
 
 # Broker and Backend Configuration : Celery
 CELERY_BROKER_URL = env.url("CELERY_BROKER_URL")

@@ -1,6 +1,6 @@
 from .env_config import env
 
-JAZZMIN_SETTINGS = {
+JAZZMIN_SETTINGS_CONFIG = {
     "site_title": env.str("SITE_TITLE", "Event Management Admin"),
     "site_header": env.str("SITE_HEADER", "Event Management Admin"),
     "site_brand": env.str("SITE_BRAND", "Event Management"),
