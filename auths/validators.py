@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 
-from auths.models import UserToken
+from auths.models import UserActivationToken
 
 
 def validate_user_registration(data):
@@ -18,10 +18,10 @@ def validate_user_registration(data):
 def validate_user_activation(data):
     try:
         user = User.objects.get(email=data["email"])
-        user_token = UserToken.objects.get(user=user, token=data["token"])
+        user_token = UserActivationToken.objects.get(user=user, token=data["token"])
     except User.DoesNotExist:
         raise ValidationError("Invalid credentials.")
-    except UserToken.DoesNotExist:
+    except UserActivationToken.DoesNotExist:
         raise ValidationError("Invalid credentials.")
     if user.is_active:
         raise ValidationError("User is already active.")
@@ -31,7 +31,7 @@ def validate_user_activation(data):
 def validate_user_token_delete(user_token):
     try:
         user_token.delete()
-    except UserToken.DoesNotExist:
+    except UserActivationToken.DoesNotExist:
         raise ValidationError("Unable to clear user activation code.")
 
 

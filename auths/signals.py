@@ -7,7 +7,7 @@ from django.dispatch import receiver
 from django_rest_passwordreset.signals import reset_password_token_created
 from django_rest_passwordreset.tokens import get_token_generator
 
-from auths.models import UserToken
+from auths.models import UserActivationToken
 from preferences.enums import EmailTemplateType
 from preferences.models import EmailTemplate
 from root.tasks import send_email_task
@@ -53,7 +53,7 @@ def send_activation_email(instance, created, **kwargs):
             raise ValueError("Account activation email template not found")
 
         token = get_token_generator().generate_token(instance)
-        UserToken.objects.create(user=instance, token=token).save()
+        UserActivationToken.objects.create(user=instance, token=token).save()
 
         activation_link = (
             f"{settings.FRONTEND_URL}/activate/"
