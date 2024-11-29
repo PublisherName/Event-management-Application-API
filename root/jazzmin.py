@@ -1,11 +1,4 @@
-from pathlib import Path
-
-import environ
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env()
-environ.Env.read_env(str(BASE_DIR / ".env"))
+from .env_config import env
 
 JAZZMIN_SETTINGS = {
     "site_title": env.str("SITE_TITLE", "Event Management Admin"),
