@@ -31,11 +31,7 @@ class Event(models.Model):
         verbose_name = "List"
         verbose_name_plural = "Lists"
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     def clean(self):
-        super().clean()
         validate_total_participants(self)
         validate_event_dates_and_time(self)
 
@@ -58,13 +54,9 @@ class EventSignup(models.Model):
         verbose_name = "Registration"
         verbose_name_plural = "Registrations"
 
-    def clean(self) -> None:
-        validate_event_exists(self.event)
-        validate_event_capacity(self.event)
-        return super().clean()
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+    def clean(self):
+        validate_event_exists(self)
+        validate_event_capacity(self)
 
     def __str__(self):
         return str(self.event.title)
