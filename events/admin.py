@@ -3,7 +3,12 @@ from django.db.models import Q
 
 from root.base_admin import SummernoteModelAdmin  # type: ignore
 
-from .models import Event, EventSignup
+from .models import Event, EventSignup, Location
+
+
+class LocationInline(admin.StackedInline):
+    model = Location
+    extra = 0
 
 
 @admin.register(Event)
@@ -21,6 +26,7 @@ class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
     search_fields = ("title", "description", "location")
     list_filter = ("start_date", "end_date", "created_at", "updated_at", "is_verified")
     readonly_fields = ["created_by"]
+    inlines = [LocationInline]
 
     @staticmethod
     def formatted_created_at(obj):
@@ -51,3 +57,10 @@ class EventSignupAdmin(admin.ModelAdmin):
         "signup_date",
     )
     readonly_fields = ["signup_date"]
+
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = ("address", "google_map_link")
+    search_fields = ("address", "google_map_link")
+    list_filter = ("address",)

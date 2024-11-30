@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.utils import timezone
 from django.utils.timezone import make_aware
 
@@ -54,3 +55,11 @@ def validate_event_capacity(instance):
         raise ValidationError(
             {"event": f"The event '{instance.event.title}' has reached the maximum quotas."}
         )
+
+
+def validate_google_map_link(instance):
+    url_validator = URLValidator()
+    try:
+        url_validator(instance.google_map_link)
+    except ValidationError:
+        raise ValidationError({"google_map_link": "Invalid URL format."})
