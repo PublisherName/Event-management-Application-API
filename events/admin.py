@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from root.base_admin import SummernoteModelAdmin  # type: ignore
 
-from .models import Event, EventSignup, Location
+from .models import Banner, Event, EventSignup, Location, Schedule
 
 
 class LocationInline(admin.StackedInline):
@@ -11,22 +11,28 @@ class LocationInline(admin.StackedInline):
     extra = 0
 
 
+class BannerInline(admin.StackedInline):
+    model = Banner
+    extra = 0
+
+
+class ScheduleInline(admin.StackedInline):
+    model = Schedule
+    extra = 0
+
+
 @admin.register(Event)
 class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
     list_display = (
         "title",
-        "start_date",
-        "end_date",
-        "start_time",
-        "end_time",
         "total_participants",
         "formatted_created_at",
         "is_verified",
     )
     search_fields = ("title", "description", "location")
-    list_filter = ("start_date", "end_date", "created_at", "updated_at", "is_verified")
+    list_filter = ("created_at", "updated_at", "is_verified")
     readonly_fields = ["created_by"]
-    inlines = [LocationInline]
+    inlines = [LocationInline, ScheduleInline, BannerInline]
 
     @staticmethod
     def formatted_created_at(obj):
@@ -64,3 +70,17 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ("address", "google_map_link")
     search_fields = ("address", "google_map_link")
     list_filter = ("address",)
+
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ("event", "image")
+    search_fields = ("event", "image")
+    list_filter = ("event",)
+
+
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    list_display = ("event", "start_date", "start_time", "end_date", "end_time")
+    search_fields = ("event", "start_date", "start_time", "end_date", "end_time")
+    list_filter = ("event", "start_date", "start_time", "end_date", "end_time")
