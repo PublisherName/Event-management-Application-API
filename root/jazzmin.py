@@ -55,7 +55,14 @@ JAZZMIN_SETTINGS_CONFIG = {
         "authtoken.TokenProxy",
         "auths.UserActivationToken",
     ],
-    "order_with_respect_to": ["auth", "auths", "events", "preferences", "django_summernote"],
+    "order_with_respect_to": [
+        "auth",
+        "auths",
+        "events",
+        "events.Event",
+        "preferences",
+        "django_summernote",
+    ],
     "icons": {
         # Auth icons
         "auth": "fas fa-users-cog",
@@ -80,6 +87,8 @@ JAZZMIN_SETTINGS_CONFIG = {
         "events.event": "fas fa-calendar",
         "events.eventsignup": "fas fa-tags",
         "events.location": "fas fa-map-marker-alt",
+        "events.banner": "fas fa-image",
+        "events.schedule": "fas fa-clock",
         # Preferences icons
         "preferences": "fas fa-cogs",
         "preferences.emailtemplate": "fas fa-envelope",

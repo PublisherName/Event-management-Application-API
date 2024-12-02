@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
-from events.models import Event, EventSignup, Location
+from events.models import Event, EventSignup, Location, Schedule
 from preferences.enums import EmailTemplateType
 from preferences.models import EmailTemplate
 from root.tasks import send_email_task
@@ -45,13 +45,12 @@ def send_event_registration_email(instance, created, **kwargs):
             "user": instance.user.username,
             "event": {
                 "title": instance.event.title,
-                "start_date": instance.event.start_date,
-                "end_date": instance.event.end_date,
-                "start_time": instance.event.start_time,
-                "end_time": instance.event.end_time,
-                "location": instance.event.location,
-                "latitude": instance.event.latitude,
-                "longitude": instance.event.longitude,
+                "start_date": instance.event.schedule.start_date,
+                "end_date": instance.event.schedule.end_date,
+                "start_time": instance.event.schedule.start_time,
+                "end_time": instance.event.schedule.end_time,
+                "address": instance.event.location.address,
+                "map_link": instance.event.location.google_map_link,
             },
             "current_year": instance.signup_date.year,
         }
@@ -67,4 +66,10 @@ def validate_eventSignup(instance, **kwargs):
 @receiver(pre_save, sender=Location)
 def validate_location(instance, **kwargs):
     """Validate the location instance before saving it to the database."""
+    instance.full_clean()
+
+
+@receiver(pre_save, sender=Schedule)
+def validate_schedule(instance, **kwargs):
+    """Validate the schedule instance before saving it to the database."""
     instance.full_clean()
