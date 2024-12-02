@@ -65,27 +65,35 @@ def validate_google_map_link(instance):
         raise ValidationError({"google_map_link": "Invalid URL format."})
 
 
-def validate_event_attributes(instance):
+def validate_event_attributes(instance, context):
     required_attributes = [
         "location",
         "schedule",
         "banner",
     ]
+    if context == "is_verified":
+        event_instance = instance
+    elif context == "event":
+        event_instance = instance.event
+    else:
+        return
 
-    event_instance = instance.event
+    if (context == "is_verified" and instance.is_verified) or context == "event":
+        missing_attributes = []
+        for attr in required_attributes:
+            if attr == "banner":
+                if not event_instance.pk or not event_instance.banner.exists():
+                    missing_attributes.append("banner")
+            else:
+                if not getattr(event_instance, attr, None):
+                    missing_attributes.append(attr)
 
-    missing_attributes = [
-        attr
-        for attr in required_attributes
-        if not hasattr(event_instance, attr) or not getattr(event_instance, attr)
-    ]
-
-    if missing_attributes:
-        raise ValidationError(
-            {
-                "event": (
-                    f"The event must have the following attributes to signup: "
-                    f"{', '.join(missing_attributes)}."
-                )
-            }
-        )
+        if missing_attributes:
+            raise ValidationError(
+                {
+                    context: (
+                        f"The event must have the following attributes: "
+                        f"{', '.join(missing_attributes)}."
+                    )
+                }
+            )

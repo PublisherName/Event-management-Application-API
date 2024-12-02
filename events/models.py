@@ -27,6 +27,7 @@ class Event(models.Model):
 
     def clean(self):
         validate_total_participants(self)
+        validate_event_attributes(self, "is_verified")
 
     def __str__(self):
         return str(self.title)
@@ -49,7 +50,7 @@ class EventSignup(models.Model):
 
     def clean(self):
         validate_event_exists(self)
-        validate_event_attributes(self)
+        validate_event_attributes(self, "event")
         validate_event_capacity(self)
 
     def __str__(self):
@@ -69,7 +70,7 @@ class Location(models.Model):
 
 
 class Banner(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="banners")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="banner")
     image = models.ImageField(upload_to="event_banners/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
