@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from events.validators import (
+    validate_event_attributes,
     validate_event_capacity,
     validate_event_dates_and_time,
     validate_event_exists,
@@ -48,6 +49,7 @@ class EventSignup(models.Model):
 
     def clean(self):
         validate_event_exists(self)
+        validate_event_attributes(self)
         validate_event_capacity(self)
 
     def __str__(self):
