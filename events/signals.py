@@ -1,8 +1,8 @@
 from django.core.exceptions import PermissionDenied
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
-from events.models import Event, EventSignup, Location, Schedule
+from events.models import Banner, Event, EventSignup, Location, Schedule
 from preferences.enums import EmailTemplateType
 from preferences.models import EmailTemplate
 from root.tasks import send_email_task
@@ -73,3 +73,18 @@ def validate_location(instance, **kwargs):
 def validate_schedule(instance, **kwargs):
     """Validate the schedule instance before saving it to the database."""
     instance.full_clean()
+
+
+@receiver(post_delete, sender=Banner)
+@receiver(post_delete, sender=Location)
+@receiver(post_delete, sender=Schedule)
+def check_verified_event_requirements(instance, **kwargs):
+    event = instance.event
+    if event:
+        has_banner = Banner.objects.filter(event=event).exists()
+        has_location = Location.objects.filter(event=event).exists()
+        has_schedule = Schedule.objects.filter(event=event).exists()
+
+        if not all([has_banner, has_location, has_schedule]):
+            event.is_verified = False
+            event.save()
