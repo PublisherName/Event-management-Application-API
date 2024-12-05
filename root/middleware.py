@@ -34,3 +34,4 @@ class HandlePermissionDeniedMiddleware:
         if isinstance(exception, PermissionDenied):
             messages.error(request, str(exception))
             return redirect(request.headers.get("referer", "/"))
+        return None
