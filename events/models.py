@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from events.managers.banners import BannerManager
 from events.validators import (
     validate_event_attributes,
     validate_event_capacity,
@@ -30,7 +31,7 @@ class Event(models.Model):
         validate_event_attributes(self, "is_verified")
 
     def __str__(self):
-        return str(self.title)
+        return f"Event: {self.title}"
 
 
 class EventSignup(models.Model):
@@ -38,7 +39,7 @@ class EventSignup(models.Model):
         User, on_delete=models.CASCADE, limit_choices_to={"is_active": True}, db_index=True
     )
     event = models.ForeignKey(
-        Event, on_delete=models.CASCADE, limit_choices_to={"is_verified": True}, db_index=True
+        Event, on_delete=models.PROTECT, limit_choices_to={"is_verified": True}, db_index=True
     )
     signup_date = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -54,7 +55,7 @@ class EventSignup(models.Model):
         validate_event_capacity(self)
 
     def __str__(self):
-        return str(self.event.title)
+        return f"{self.user.username} has signed up for {self.event.title} event."
 
 
 class Location(models.Model):
@@ -73,6 +74,8 @@ class Banner(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="banner")
     image = models.ImageField(upload_to="event_banners/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    objects = BannerManager()
 
     def __str__(self):
         return f"Banner for {self.event.title} uploaded at {self.uploaded_at}"
