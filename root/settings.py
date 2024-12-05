@@ -76,6 +76,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "root.middleware.FileRenameMiddleware",
+    "root.middleware.HandlePermissionDeniedMiddleware",
 ]
 
 ROOT_URLCONF = "root.urls"

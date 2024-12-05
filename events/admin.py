@@ -8,17 +8,20 @@ from .models import Banner, Event, EventSignup, Location, Schedule
 
 class LocationInline(admin.StackedInline):
     model = Location
-    extra = 0
+    can_delete = False
+    extra = 1
 
 
 class BannerInline(admin.StackedInline):
     model = Banner
-    extra = 0
+    can_delete = False
+    extra = 1
 
 
 class ScheduleInline(admin.StackedInline):
     model = Schedule
-    extra = 0
+    can_delete = False
+    extra = 1
 
 
 @admin.register(Event)

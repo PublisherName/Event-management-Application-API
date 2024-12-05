@@ -88,3 +88,26 @@ def check_verified_event_requirements(instance, **kwargs):
         if not all([has_banner, has_location, has_schedule]):
             event.is_verified = False
             event.save()
+
+
+@receiver(pre_delete, sender=Location)
+@receiver(pre_delete, sender=Schedule)
+def restrict_deletion(instance, **kwargs):
+    """Restrict the deletion of a related model if the event is verified."""
+    if instance.event.is_verified:
+        raise PermissionDenied(
+            "You cannot delete this object because its associated with verified event."
+        )
+
+
+@receiver(pre_delete, sender=Banner)
+def restrict_banner_deletion(instance, **kwargs):
+    """Restrict the deletion of a banner if it is the last one for a verified event."""
+    event = instance.event
+    if event.is_verified:
+        remaining_banners = Banner.objects.filter(event=event).exclude(id=instance.id).count()
+        if remaining_banners == 0:
+            raise PermissionDenied(
+                "You cannot delete this banner because it is the last one "
+                "associated with a verified event."
+            )

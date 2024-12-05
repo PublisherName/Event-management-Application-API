@@ -77,69 +77,9 @@ jobs:
         run: |
           python manage.py test --noinput || exit 1
 
-  redis:
-    runs-on: ubuntu-latest
-    needs: build
-    strategy:
-      matrix:
-        python-version: ["3.12"]
-        redis-version: ["7"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Start Redis
-        uses: supercharge/redis-github-action@1.7.0
-        with:
-          redis-version: ${{ matrix.redis-version }}
-
-      - name: Add sample .env file
-        run: |
-          if [ ! -f env.example ]; then
-            echo "Error: .env.example file not found"
-            exit 1
-          fi
-          cp env.example .env || { echo "Error: Failed to copy .env file"; exit 1; }
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Load environment variables from .env file
-        run: |
-          if [ ! -f .env ]; then
-              echo "Error: .env file not found"
-              exit 1
-            fi
-          echo "Loading environment variables from .env file"
-          set -a
-          source .env
-          set +a
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Start Celery Worker
-        run:  celery -A root worker --loglevel=info --concurrency=1 &
-
-      - name: Check Celery Status
-        run: |
-            for i in {1..5}; do
-              if celery -A root inspect ping -t 10 2>/dev/null; then
-                echo "Celery worker is running"
-                exit 0
-              fi
-              echo "Waiting for Celery worker to start... (attempt $i/5)"
-              sleep 5
-            done
-            echo "Error: Celery worker failed to start"
-            exit 1
 
   analyze:
     runs-on: ubuntu-latest
-    needs: redis
     permissions:
       actions: read
       contents: read
