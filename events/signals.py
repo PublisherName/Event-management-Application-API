@@ -2,6 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 
+from events.enums import EventStatus
 from events.models import Banner, Event, EventSignup, Location, Schedule
 from preferences.enums import EmailTemplateType
 from preferences.models import EmailTemplate
@@ -80,13 +81,13 @@ def validate_schedule(instance, **kwargs):
 @receiver(post_delete, sender=Schedule)
 def check_verified_event_requirements(instance, **kwargs):
     event = instance.event
-    if event:
+    if event and event.status in [EventStatus.ACTIVE]:
         has_banner = Banner.objects.filter(event=event).exists()
         has_location = Location.objects.filter(event=event).exists()
         has_schedule = Schedule.objects.filter(event=event).exists()
 
         if not all([has_banner, has_location, has_schedule]):
-            event.is_verified = False
+            event.status = EventStatus.DRAFT
             event.save()
 
 
@@ -94,20 +95,32 @@ def check_verified_event_requirements(instance, **kwargs):
 @receiver(pre_delete, sender=Schedule)
 def restrict_deletion(instance, **kwargs):
     """Restrict the deletion of a related model if the event is verified."""
-    if instance.event.is_verified:
+    if instance.event.status in [EventStatus.ACTIVE.name, EventStatus.COMPLETED.name]:
         raise PermissionDenied(
-            "You cannot delete this object because its associated with verified event."
+            "You cannot delete this object because its associated with active event."
         )
 
 
 @receiver(pre_delete, sender=Banner)
 def restrict_banner_deletion(instance, **kwargs):
-    """Restrict the deletion of a banner if it is the last one for a verified event."""
+    """Restrict the deletion of a banner if it is the last one for a active/completed event."""
     event = instance.event
-    if event.is_verified:
+    if event.status in [EventStatus.ACTIVE.name, EventStatus.COMPLETED.name]:
         remaining_banners = Banner.objects.filter(event=event).exclude(id=instance.id).count()
         if remaining_banners == 0:
             raise PermissionDenied(
                 "You cannot delete this banner because it is the last one "
-                "associated with a verified event."
+                "associated with a active event."
             )
+
+
+@receiver(pre_save, sender=Banner)
+def validate_banner(instance, **kwargs):
+    """
+    Validate the banner instance before saving it to the database.
+    Restrict the addition of a banner for a completed/cancelled event.
+    """
+    event = instance.event
+    if event.status in [EventStatus.COMPLETED, EventStatus.CANCELLED]:
+        raise PermissionDenied("You cannot add a banner for a cancelled/completed event.")
+    instance.full_clean()

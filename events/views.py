@@ -3,6 +3,7 @@ from rest_framework import authentication, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from .enums import EventStatus
 from .models import Event, EventSignup
 from .serializers import EventSerializer, EventSignupSerializer
 
@@ -15,10 +16,10 @@ class EventViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_anonymous:
-            return Event.objects.filter(is_verified=True)
+            return Event.objects.filter(status=EventStatus.ACTIVE)
         if user.is_superuser:
             return Event.objects.all()
-        return Event.objects.filter(Q(created_by=user) | Q(is_verified=True))
+        return Event.objects.filter(Q(created_by=user) | Q(status=EventStatus.ACTIVE))
 
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:

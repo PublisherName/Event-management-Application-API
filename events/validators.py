@@ -5,6 +5,8 @@ from django.core.validators import URLValidator
 from django.utils import timezone
 from django.utils.timezone import make_aware
 
+from events.enums import EventStatus
+
 
 def validate_event_dates_and_time(instance):
     now = timezone.now()
@@ -46,8 +48,8 @@ def validate_event_exists(instance):
     if not instance.event_id:
         raise ValidationError({"event": "Event does not exist."})
 
-    if not instance.event.is_verified:
-        raise ValidationError({"event": "Event is not verified."})
+    if not instance.event.status == EventStatus.ACTIVE:
+        raise ValidationError({"event": "Event is not active."})
 
 
 def validate_event_capacity(instance):
@@ -71,14 +73,16 @@ def validate_event_attributes(instance, context):
         "schedule",
         "banner",
     ]
-    if context == "is_verified":
+    if context == "status":
         event_instance = instance
     elif context == "event":
         event_instance = instance.event
     else:
         return
 
-    if (context == "is_verified" and instance.is_verified) or context == "event":
+    if (
+        context == "status" and instance.status in [EventStatus.ACTIVE, EventStatus.COMPLETED]
+    ) or context == "event":
         missing_attributes = []
         for attr in required_attributes:
             if attr == "banner":

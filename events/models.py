@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+from events.enums import EventStatus
 from events.managers.banners import BannerManager
 from events.validators import (
     validate_event_attributes,
@@ -17,9 +18,13 @@ class Event(models.Model):
     description = models.TextField()
     total_participants = models.PositiveIntegerField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(
+        max_length=10,
+        choices=EventStatus.choices,
+        default=EventStatus.DRAFT,
+    )
 
     class Meta:
         ordering = ["created_at"]
@@ -28,7 +33,7 @@ class Event(models.Model):
 
     def clean(self):
         validate_total_participants(self)
-        validate_event_attributes(self, "is_verified")
+        validate_event_attributes(self, "status")
 
     def __str__(self):
         return f"Event: {self.title}"
@@ -39,7 +44,10 @@ class EventSignup(models.Model):
         User, on_delete=models.CASCADE, limit_choices_to={"is_active": True}, db_index=True
     )
     event = models.ForeignKey(
-        Event, on_delete=models.PROTECT, limit_choices_to={"is_verified": True}, db_index=True
+        Event,
+        on_delete=models.PROTECT,
+        limit_choices_to={"status": EventStatus.ACTIVE},
+        db_index=True,
     )
     signup_date = models.DateTimeField(auto_now_add=True, editable=False)
 
@@ -59,7 +67,11 @@ class EventSignup(models.Model):
 
 
 class Location(models.Model):
-    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="location")
+    event = models.OneToOneField(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="location",
+    )
     address = models.CharField(max_length=255)
     google_map_link = models.URLField(max_length=500)
 
@@ -71,7 +83,11 @@ class Location(models.Model):
 
 
 class Banner(models.Model):
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="banner")
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="banner",
+    )
     image = models.ImageField(upload_to="event_banners/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
@@ -82,7 +98,11 @@ class Banner(models.Model):
 
 
 class Schedule(models.Model):
-    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="schedule")
+    event = models.OneToOneField(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="schedule",
+    )
     start_date = models.DateField()
     end_date = models.DateField()
     start_time = models.TimeField(default="00:00:00")

@@ -3,25 +3,26 @@ from django.db.models import Q
 
 from root.base_admin import SummernoteModelAdmin  # type: ignore
 
+from .enums import EventStatus
 from .models import Banner, Event, EventSignup, Location, Schedule
 
 
 class LocationInline(admin.StackedInline):
     model = Location
     can_delete = False
-    extra = 1
+    extra = 0
 
 
 class BannerInline(admin.StackedInline):
     model = Banner
     can_delete = False
-    extra = 1
+    extra = 0
 
 
 class ScheduleInline(admin.StackedInline):
     model = Schedule
     can_delete = False
-    extra = 1
+    extra = 0
 
 
 @admin.register(Event)
@@ -30,10 +31,10 @@ class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
         "title",
         "total_participants",
         "formatted_created_at",
-        "is_verified",
+        "status",
     )
     search_fields = ("title", "description", "location")
-    list_filter = ("created_at", "updated_at", "is_verified")
+    list_filter = ("created_at", "updated_at", "status")
     readonly_fields = ["created_by"]
     inlines = [LocationInline, ScheduleInline, BannerInline]
 
@@ -54,7 +55,7 @@ class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
         qs = super().get_queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(Q(created_by=request.user) | Q(is_verified=True))
+        return qs.filter(Q(created_by=request.user) | Q(status=EventStatus.ACTIVE))
 
 
 @admin.register(EventSignup)
