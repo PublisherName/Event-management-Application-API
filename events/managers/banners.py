@@ -2,6 +2,8 @@ from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models import QuerySet
 
+from events.enums import EventStatus
+
 
 class BannerQuerySet(QuerySet):
     def delete(self, *args, **kwargs):
@@ -14,13 +16,15 @@ class BannerQuerySet(QuerySet):
             banners_to_delete = self.filter(event_id=event_id).count()
 
             if banners_to_delete >= total_banners:
-                verified_event = self.model.objects.filter(
-                    event_id=event_id, event__is_verified=True
-                ).exists()
+                verified_event = (
+                    self.model.objects.filter(event_id=event_id)
+                    .exclude(event__status=EventStatus.DRAFT)
+                    .exists()
+                )
                 if verified_event:
                     raise PermissionDenied(
                         "Cannot delete banners as it would leave "
-                        "a verified event without any banners."
+                        "a active event without any banners."
                     )
         super().delete(*args, **kwargs)
 

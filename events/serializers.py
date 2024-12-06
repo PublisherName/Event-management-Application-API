@@ -2,7 +2,8 @@ from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from .models import Event, EventSignup
+from events.enums import EventStatus
+from events.models import Event, EventSignup
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -13,7 +14,7 @@ class EventSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         user = self.context["request"].user
         if not user.is_superuser:
-            self.validated_data["is_verified"] = False
+            self.validated_data["status"] = EventStatus.DRAFT
         try:
             return super().save(**kwargs)
         except DjangoValidationError as e:
