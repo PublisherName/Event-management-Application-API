@@ -11,9 +11,14 @@ from events.enums import EventStatus
 def validate_event_dates_and_time(instance):
     now = timezone.now()
 
-    if instance.start_date and instance.start_time:
+    if all([instance.start_date, instance.start_time, instance.end_date, instance.end_time]):
         start_datetime = datetime.combine(instance.start_date, instance.start_time)
         start_datetime = make_aware(start_datetime)
+
+        end_datetime = datetime.combine(instance.end_date, instance.end_time)
+        end_datetime = make_aware(end_datetime)
+
+        # Validate that start datetime is in the future
         if start_datetime <= now:
             raise ValidationError(
                 {
@@ -21,11 +26,15 @@ def validate_event_dates_and_time(instance):
                     "start_time": ("The start time must be in the future"),
                 }
             )
-    if instance.end_date and instance.end_date <= instance.start_date:
-        raise ValidationError({"end_date": ("The end date must be after the start date.")})
 
-    if instance.start_time and instance.end_time and instance.end_time <= instance.start_time:
-        raise ValidationError({"end_time": ("The end time must be after the start time.")})
+        # Validate that end datetime is greater than start datetime
+        if end_datetime <= start_datetime:
+            raise ValidationError(
+                {
+                    "end_date": ("The end date must be greater or equal to start date."),
+                    "end_time": ("The end time must be greater than start time."),
+                }
+            )
 
 
 def validate_total_participants(event):
