@@ -8,7 +8,11 @@ from faker import Faker
 from PIL import Image
 
 from events.enums import EventStatus
-from events.models import Banner, Event, Location, Schedule
+from events.models.banner import Banner
+from events.models.category import Category
+from events.models.event import Event
+from events.models.location import Location
+from events.models.schedule import Schedule
 
 fake = Faker()
 
@@ -21,12 +25,15 @@ class Command(BaseCommand):
             username="fakeuser", defaults={"password": "fakepassword"}
         )
 
+        for _ in range(4):
+            self.create_category()
+
         for _ in range(10):
             description_html = "".join(fake.paragraphs(nb=3, ext_word_list=None))
-
             event = Event.objects.create(
                 title=fake.sentence(nb_words=6),
                 description=f"<p>{description_html}</p>",
+                category=Category.objects.filter(is_active=True).order_by("?").first(),
                 total_participants=fake.random_int(min=10, max=100),
                 created_by=user,
                 status=EventStatus.DRAFT,
@@ -40,6 +47,16 @@ class Command(BaseCommand):
             event.save()
 
             self.stdout.write(self.style.SUCCESS(f"Successfully created event: {event.title}"))
+
+    @staticmethod
+    def create_image():
+        image = Image.new("RGB", (100, 100), color="blue")
+        image_io = BytesIO()
+        image.save(image_io, format="PNG")
+        image_io.seek(0)
+
+        image_name = fake.uuid4() + ".png"
+        return ContentFile(image_io.read(), image_name)
 
     @staticmethod
     def create_schedule(event):
@@ -61,19 +78,10 @@ class Command(BaseCommand):
             end_time=end_time,
         )
 
-    @staticmethod
-    def create_banner(event):
-        image = Image.new("RGB", (100, 100), color="blue")
-        image_io = BytesIO()
-        image.save(image_io, format="PNG")
-        image_io.seek(0)
-
-        image_name = fake.uuid4() + ".png"
-        image_file = ContentFile(image_io.read(), image_name)
-
+    def create_banner(self, event):
         Banner.objects.create(
             event=event,
-            image=image_file,
+            image=self.create_image(),
             uploaded_at=fake.date_time_this_year(),
         )
 
@@ -83,4 +91,12 @@ class Command(BaseCommand):
             event=event,
             address=fake.address(),
             google_map_link=fake.url(),
+        )
+
+    def create_category(self):
+        return Category.objects.create(
+            name=fake.word(),
+            description=fake.sentence(),
+            icon=self.create_image(),
+            is_active=fake.boolean(chance_of_getting_true=50),
         )

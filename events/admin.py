@@ -1,10 +1,15 @@
 from django.contrib import admin
 from django.db.models import Q
 
-from root.base_admin import SummernoteModelAdmin  # type: ignore
-
-from .enums import EventStatus
-from .models import Banner, Event, EventSignup, Location, Schedule
+from events.enums import EventStatus
+from events.filters.category import ActiveCategoryFilter
+from events.models.banner import Banner
+from events.models.category import Category
+from events.models.event import Event
+from events.models.location import Location
+from events.models.schedule import Schedule
+from events.models.signup import EventSignup
+from root.base_admin import SummernoteModelAdmin
 
 
 class LocationInline(admin.StackedInline):
@@ -29,12 +34,22 @@ class ScheduleInline(admin.StackedInline):
 class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
     list_display = (
         "title",
+        "category",
         "total_participants",
         "formatted_created_at",
         "status",
     )
-    search_fields = ("title", "description", "location")
-    list_filter = ("created_at", "updated_at", "status")
+    search_fields = (
+        "title",
+        "description",
+        "status",
+        "category__name",
+    )
+    list_filter = (
+        "created_at",
+        "status",
+        ActiveCategoryFilter,
+    )
     readonly_fields = ["created_by"]
     inlines = [LocationInline, ScheduleInline, BannerInline]
 
@@ -60,8 +75,16 @@ class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
 
 @admin.register(EventSignup)
 class EventSignupAdmin(admin.ModelAdmin):
-    list_display = ("user", "event", "signup_date")
-    search_fields = ("user", "event", "signup_date")
+    list_display = (
+        "user",
+        "event",
+        "signup_date",
+    )
+    search_fields = (
+        "user",
+        "event",
+        "signup_date",
+    )
     list_filter = (
         "event",
         "signup_date",
@@ -71,20 +94,70 @@ class EventSignupAdmin(admin.ModelAdmin):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ("address", "google_map_link")
-    search_fields = ("address", "google_map_link")
+    list_display = (
+        "address",
+        "google_map_link",
+    )
+    search_fields = (
+        "address",
+        "google_map_link",
+    )
     list_filter = ("address",)
 
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ("event", "image")
-    search_fields = ("event", "image")
+    list_display = (
+        "event",
+        "image",
+    )
+    search_fields = (
+        "event",
+        "image",
+    )
     list_filter = ("event",)
 
 
 @admin.register(Schedule)
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ("event", "start_date", "start_time", "end_date", "end_time")
-    search_fields = ("event", "start_date", "start_time", "end_date", "end_time")
-    list_filter = ("event", "start_date", "start_time", "end_date", "end_time")
+    list_display = (
+        "event",
+        "start_date",
+        "start_time",
+        "end_date",
+        "end_time",
+    )
+    search_fields = (
+        "event",
+        "start_date",
+        "start_time",
+        "end_date",
+        "end_time",
+    )
+    list_filter = (
+        "event",
+        "start_date",
+        "start_time",
+        "end_date",
+        "end_time",
+    )
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "created_at",
+        "is_active",
+    )
+    search_fields = (
+        "name",
+        "is_active",
+    )
+    list_filter = (
+        "name",
+        "is_active",
+    )
+    readonly_fields = [
+        "created_at",
+    ]

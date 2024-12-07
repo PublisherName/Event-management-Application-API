@@ -3,7 +3,12 @@ from django.db.models.signals import post_delete, post_save, pre_delete, pre_sav
 from django.dispatch import receiver
 
 from events.enums import EventStatus
-from events.models import Banner, Event, EventSignup, Location, Schedule
+from events.models.banner import Banner
+from events.models.category import Category
+from events.models.event import Event
+from events.models.location import Location
+from events.models.schedule import Schedule
+from events.models.signup import EventSignup
 from preferences.enums import EmailTemplateType
 from preferences.models import EmailTemplate
 from root.tasks import send_email_task
@@ -123,4 +128,19 @@ def validate_banner(instance, **kwargs):
     event = instance.event
     if event.status in [EventStatus.COMPLETED, EventStatus.CANCELLED]:
         raise PermissionDenied("You cannot add a banner for a cancelled/completed event.")
+    instance.full_clean()
+
+
+@receiver(pre_save, sender=Category)
+def restrict_category_update(instance, **kwargs):
+    """
+    Restrict the update of a category if it is associated with a active/completed event.
+    """
+    if (
+        instance.pk
+        and instance.event_set.filter(
+            status__in=[EventStatus.ACTIVE.name, EventStatus.COMPLETED.name]
+        ).exists()
+    ):
+        raise PermissionDenied("You cannot update a category linked to an active/completed event.")
     instance.full_clean()

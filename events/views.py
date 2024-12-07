@@ -3,8 +3,10 @@ from rest_framework import authentication, status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from events.models.event import Event
+from events.models.signup import EventSignup
+
 from .enums import EventStatus
-from .models import Event, EventSignup
 from .serializers import EventSerializer, EventSignupSerializer
 
 
