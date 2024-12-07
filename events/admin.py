@@ -29,6 +29,7 @@ class ScheduleInline(admin.StackedInline):
 class EventAdmin(SummernoteModelAdmin, admin.ModelAdmin):
     list_display = (
         "title",
+        "category",
         "total_participants",
         "formatted_created_at",
         "status",

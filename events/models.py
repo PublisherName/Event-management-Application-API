@@ -16,7 +16,7 @@ from events.validators import (
 class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    categorty = models.ForeignKey(
+    category = models.ForeignKey(
         "Category",
         on_delete=models.PROTECT,
         limit_choices_to={"is_active": True},
