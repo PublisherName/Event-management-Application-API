@@ -3,7 +3,11 @@ from django.db.models.signals import post_delete, post_save, pre_delete, pre_sav
 from django.dispatch import receiver
 
 from events.enums import EventStatus
-from events.models import Banner, Event, EventSignup, Location, Schedule
+from events.models.banner import Banner
+from events.models.event import Event
+from events.models.location import Location
+from events.models.schedule import Schedule
+from events.models.signup import EventSignup
 from preferences.enums import EmailTemplateType
 from preferences.models import EmailTemplate
 from root.tasks import send_email_task

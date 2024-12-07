@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from events.enums import EventStatus
-from events.models import Event, EventSignup
+from events.models.event import Event
+from events.models.signup import EventSignup
 
 
 class EventSerializer(serializers.ModelSerializer):

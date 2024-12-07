@@ -8,7 +8,11 @@ from faker import Faker
 from PIL import Image
 
 from events.enums import EventStatus
-from events.models import Banner, Category, Event, Location, Schedule
+from events.models.banner import Banner
+from events.models.category import Category
+from events.models.event import Event
+from events.models.location import Location
+from events.models.schedule import Schedule
 
 fake = Faker()
 

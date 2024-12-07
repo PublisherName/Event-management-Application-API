@@ -1,11 +1,15 @@
 from django.contrib import admin
 from django.db.models import Q
 
+from events.enums import EventStatus
 from events.filters.category import ActiveCategoryFilter
-from root.base_admin import SummernoteModelAdmin  # type: ignore
-
-from .enums import EventStatus
-from .models import Banner, Category, Event, EventSignup, Location, Schedule
+from events.models.banner import Banner
+from events.models.category import Category
+from events.models.event import Event
+from events.models.location import Location
+from events.models.schedule import Schedule
+from events.models.signup import EventSignup
+from root.base_admin import SummernoteModelAdmin
 
 
 class LocationInline(admin.StackedInline):

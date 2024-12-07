@@ -1,6 +1,6 @@
 from django.contrib.admin import SimpleListFilter
 
-from events.models import Category
+from events.models.category import Category
 
 
 class ActiveCategoryFilter(SimpleListFilter):
