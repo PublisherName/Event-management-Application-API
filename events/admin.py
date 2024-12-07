@@ -4,7 +4,7 @@ from django.db.models import Q
 from root.base_admin import SummernoteModelAdmin  # type: ignore
 
 from .enums import EventStatus
-from .models import Banner, Event, EventSignup, Location, Schedule
+from .models import Banner, Category, Event, EventSignup, Location, Schedule
 
 
 class LocationInline(admin.StackedInline):
@@ -88,3 +88,11 @@ class ScheduleAdmin(admin.ModelAdmin):
     list_display = ("event", "start_date", "start_time", "end_date", "end_time")
     search_fields = ("event", "start_date", "start_time", "end_date", "end_time")
     list_filter = ("event", "start_date", "start_time", "end_date", "end_time")
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_at", "is_active")
+    search_fields = ("name", "is_active")
+    list_filter = ("name", "is_active")
+    readonly_fields = ["created_at"]

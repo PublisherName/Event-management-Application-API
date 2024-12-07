@@ -89,6 +89,7 @@ JAZZMIN_SETTINGS_CONFIG = {
         "events.location": "fas fa-map-marker-alt",
         "events.banner": "fas fa-image",
         "events.schedule": "fas fa-clock",
+        "events.category": "fas fa-tags",
         # Preferences icons
         "preferences": "fas fa-cogs",
         "preferences.emailtemplate": "fas fa-envelope",

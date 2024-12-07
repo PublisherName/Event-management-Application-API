@@ -16,6 +16,11 @@ from events.validators import (
 class Event(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    categorty = models.ForeignKey(
+        "Category",
+        on_delete=models.PROTECT,
+        limit_choices_to={"is_active": True},
+    )
     total_participants = models.PositiveIntegerField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -113,3 +118,15 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"Schedule for {self.event.title}"
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True, null=True)
+    icon = models.ImageField(upload_to="category_icons/", blank=True, null=True)
+    is_active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
