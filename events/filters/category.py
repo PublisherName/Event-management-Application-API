@@ -8,7 +8,7 @@ class ActiveCategoryFilter(SimpleListFilter):
     parameter_name = "category"
 
     def lookups(self, request, model_admin):  # noqa: PLR6301
-        active_categories = Category.objects.filter(is_active=True)
+        active_categories = Category.objects.filter(is_active=True).order_by("name")
         return [(category.id, category.name) for category in active_categories]
 
     def queryset(self, request, queryset):
