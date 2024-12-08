@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.db.models import QuerySet
 
-from events.enums import EventStatus
+from events.enums.status import EventStatus
 
 
 class BannerQuerySet(QuerySet):

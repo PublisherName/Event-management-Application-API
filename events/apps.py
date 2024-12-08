@@ -6,5 +6,9 @@ class EventsConfig(AppConfig):
     name = "events"
 
     def ready(self):  # noqa: PLR6301
-        import events.signals  # type: ignore # noqa: F401
+        import events.signals.banner  # type: ignore # noqa: F401
+        import events.signals.category
+        import events.signals.events
+        import events.signals.signup
+        import events.signals.triggers
         import events.validators  # type: ignore # noqa: F401

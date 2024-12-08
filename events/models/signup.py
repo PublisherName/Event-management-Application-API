@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from events.enums import EventStatus
+from events.enums.status import EventStatus
 from events.models.event import Event
 from events.validators import (
     validate_event_attributes,
