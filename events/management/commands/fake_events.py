@@ -13,6 +13,7 @@ from events.models.category import Category
 from events.models.event import Event
 from events.models.location import Location
 from events.models.schedule import Schedule
+from root.env_config import env
 
 fake = Faker()
 
@@ -22,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         user, _ = User.objects.get_or_create(
-            username="fakeuser", defaults={"password": "fakepassword"}
+            username=env("FAKER_USERNAME"), defaults={"password": env("FAKER_PASSWORD")}
         )
 
         for _ in range(4):
