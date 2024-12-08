@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from faker import Faker
 from PIL import Image
 
-from events.enums import EventStatus
+from events.enums.status import EventStatus
 from events.models.banner import Banner
 from events.models.category import Category
 from events.models.event import Event

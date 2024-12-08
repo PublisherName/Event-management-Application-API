@@ -5,7 +5,7 @@ from django.core.validators import URLValidator
 from django.utils import timezone
 from django.utils.timezone import make_aware
 
-from events.enums import EventStatus
+from events.enums.status import EventStatus
 
 
 def validate_event_dates_and_time(instance):

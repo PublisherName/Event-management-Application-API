@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Q
 
-from events.enums import EventStatus
+from events.enums.status import EventStatus
 from events.filters.category import ActiveCategoryFilter
 from events.models.banner import Banner
 from events.models.category import Category

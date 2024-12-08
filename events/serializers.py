@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
-from events.enums import EventStatus
+from events.enums.status import EventStatus
 from events.models.event import Event
 from events.models.signup import EventSignup
 
