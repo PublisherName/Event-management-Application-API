@@ -3,26 +3,18 @@ services:
     build:
       context: .
     container_name: backend
-    hostname: backend
     restart: on-failure
     volumes:
       - .:/app
-      - static_volume:/app/public/static
-      - media_volume:/app/public/media
-      - log_volume:/app/logs
-    command: >
-      sh -c "python manage.py makemigrations --noinput &&
-            python manage.py migrate --noinput &&
-            python manage.py seed_preferences &&
-            python manage.py collectstatic --noinput &&
-            gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=2 root.wsgi"
-    stdin_open: true
+      - event_data:/app/
+    command: gunicorn -b 0.0.0.0:8000 --worker-class=gevent --worker-connections=1000 --workers=2 root.wsgi
+    env_file:
+      - .env
     depends_on:
       redis:
         condition: service_healthy
-    tty: true
     networks:
-      - shared_network
+      - event_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://backend:8000/health/"]
       interval: 30s
@@ -36,7 +28,7 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "celery -A root worker --loglevel=info"
+      celery -A root worker --loglevel=info
     depends_on:
       backend:
         condition: service_healthy
@@ -47,19 +39,17 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
-    volumes: [.:/app]
+    volumes:
+      - event_data:/app/
     networks:
-      - shared_network
+      - event_net
 
   redis:
     image: redis:6.2-alpine
     container_name: redis
     restart: always
     networks:
-      - shared_network
-    volumes:
-      - redis_data:/data
+      - event_net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -72,6 +62,8 @@ services:
     build: ./nginx-server
     ports:
       - 80:80
+    volumes:
+      - event_data:/app/
     depends_on:
       backend:
         condition: service_healthy
@@ -80,18 +72,12 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - shared_network
-    volumes:
-      - static_volume:/app/public/static
-      - media_volume:/app/public/media
-      - log_volume:/app/logs
+      - event_net
 
 volumes:
-  redis_data:
-  static_volume:
-  media_volume:
-  log_volume:
+  event_data:
+    driver: local
 
 networks:
-  shared_network:
+  event_net:
     driver: bridge

@@ -68,6 +68,7 @@ share/python-wheels/
 ##################
 pip-log.txt
 pip-delete-this-directory.txt
+logs/
 
 # Unit test / coverage reports #
 ################################
@@ -142,3 +143,6 @@ dmypy.json
 # StaticFiles #
 ################
 public/
+
+.github/
+.ruff_cache/
